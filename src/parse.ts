@@ -47,6 +47,7 @@ interface ParserArgs {
   errorCallback?(error: string): void
   directiveCallback?(directive: GFF3.GFF3Directive): void
   sequenceCallback?(sequence: GFF3.GFF3Sequence): void
+  bufferSize?: number
   disableDerivesFromReferences?: boolean
 }
 
@@ -63,6 +64,7 @@ export default class Parser {
   disableDerivesFromReferences: boolean
   directiveCallback: (directive: GFF3.GFF3Directive) => void
   sequenceCallback: (sequence: GFF3.GFF3Sequence) => void
+  bufferSize: number
   fastaParser: FASTAParser | undefined = undefined
   // if this is true, the parser ignores the
   // rest of the lines in the file.  currently
@@ -100,6 +102,9 @@ export default class Parser {
     this.sequenceCallback = args.sequenceCallback || nullFunc
     this.disableDerivesFromReferences =
       args.disableDerivesFromReferences || false
+
+    // number of lines to buffer
+    this.bufferSize = args.bufferSize === undefined ? 1000 : args.bufferSize
   }
 
   addLine(line: string): void {
@@ -199,13 +204,14 @@ export default class Parser {
       }
     }
 
-    while (true) {
+    while (
+      this._underConstructionTopLevel.length + additionalItemCount >
+      this.bufferSize
+    ) {
       const item = this._underConstructionTopLevel.shift()
       if (item) {
         this._emitItem(item)
         _unbufferItem(item)
-      } else {
-        break
       }
     }
   }

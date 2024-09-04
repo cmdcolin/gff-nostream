@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import gff from '../src'
 import { GFF3FeatureLine } from '../src/util'
 

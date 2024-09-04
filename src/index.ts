@@ -1,19 +1,9 @@
-import {
-  parseStream,
-  parseStringSync,
-  formatSync,
-  formatStream,
-  formatFile,
-} from './api'
+import { parseStringSync } from './api'
 
 import * as util from './util'
 
 export default {
-  parseStream,
   parseStringSync,
-  formatSync,
-  formatStream,
-  formatFile,
   util,
 }
 

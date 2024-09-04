@@ -1,5 +1,5 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import eslint from '@eslint/js'
+import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
@@ -17,7 +17,6 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylisticTypeChecked,
   ...tseslint.configs.strictTypeChecked,
-  eslintPluginUnicorn.configs['flat/recommended'],
   {
     rules: {
       '@typescript-eslint/no-unused-vars': [

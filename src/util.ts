@@ -47,7 +47,7 @@ export function escapeColumn(rawVal: string | number): string {
  * @returns Parsed attributes
  */
 export function parseAttributes(attrString: string): GFF3Attributes {
-  if (!attrString?.length || attrString === '.') {
+  if (!attrString.length || attrString === '.') {
     return {}
   }
 
