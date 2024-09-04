@@ -1,18 +1,12 @@
 import { parseStringSync } from './api'
+export { parseStringSync }
 
-import * as util from './util'
-
-export default {
-  parseStringSync,
-  util,
-}
-
-export {
-  type GFF3Comment,
-  type GFF3Feature,
-  type GFF3Directive,
-  type GFF3FeatureLineWithRefs,
-  type GFF3FeatureLine,
-  type GFF3Item,
-  type GFF3Sequence,
+export type {
+  GFF3Comment,
+  GFF3Feature,
+  GFF3Directive,
+  GFF3FeatureLineWithRefs,
+  GFF3FeatureLine,
+  GFF3Item,
+  GFF3Sequence,
 } from './api'

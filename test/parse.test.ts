@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'fs'
-import gff from '../src'
+import { parseStringSync } from '../src'
 import { formatFeature } from '../src/util'
 
 describe('GFF3 parser', () => {
   it('can parse gff3_with_syncs.gff3', async () => {
-    const stuff = gff.parseStringSync(
+    const stuff = parseStringSync(
       fs.readFileSync('test/data/gff3_with_syncs.gff3', 'utf8'),
     )
     expect(stuff).toMatchSnapshot()
@@ -28,7 +28,7 @@ describe('GFF3 parser', () => {
     ] as const
   ).forEach(([count, filename]) => {
     it(`can cursorily parse ${filename}`, async () => {
-      const stuff = gff.parseStringSync(
+      const stuff = parseStringSync(
         fs.readFileSync(`test/data/${filename}`, 'utf8'),
       )
       expect(stuff).toMatchSnapshot()
@@ -36,25 +36,21 @@ describe('GFF3 parser', () => {
   })
 
   it('supports children before parents, and Derives_from', async () => {
-    const stuff = gff.parseStringSync(
+    const stuff = parseStringSync(
       fs.readFileSync('test/data/knownGene_out_of_order.gff3', 'utf8'),
-    )
-    // $p->max_lookback(2);
-    const expectedOutput = JSON.parse(
-      fs.readFileSync('test/data/knownGene_out_of_order.result.json', 'utf8'),
     )
     expect(stuff).toMatchSnapshot()
   })
 
   it('can parse the EDEN gene from the gff3 spec', async () => {
-    const stuff = gff.parseStringSync(
+    const stuff = parseStringSync(
       fs.readFileSync('test/data/spec_eden.gff3', 'utf8'),
     )
     expect(stuff).toMatchSnapshot()
   })
 
   it('can parse an excerpt of the refGene gff3', async () => {
-    const stuff = gff.parseStringSync(
+    const stuff = parseStringSync(
       fs.readFileSync('test/data/refGene_excerpt.gff3', 'utf8'),
     )
     expect(true).toBeTruthy()
@@ -62,14 +58,14 @@ describe('GFF3 parser', () => {
   })
 
   it('can parse an excerpt of the TAIR10 gff3', async () => {
-    const stuff = gff.parseStringSync(
+    const stuff = parseStringSync(
       fs.readFileSync('test/data/tair10.gff3', 'utf8'),
     )
     expect(stuff).toHaveLength(3)
   })
 
   it('can parse chr1 TAIR10 gff3', async () => {
-    const stuff = gff.parseStringSync(
+    const stuff = parseStringSync(
       fs.readFileSync('test/data/tair10_chr1.gff', 'utf8'),
       {
         disableDerivesFromReferences: true,
@@ -83,7 +79,7 @@ describe('GFF3 parser', () => {
     (errorFile) => {
       it(`throws an error when parsing ${errorFile}`, async () => {
         try {
-          gff.parseStringSync(fs.readFileSync(`test/data/${errorFile}`, 'utf8'))
+          parseStringSync(fs.readFileSync(`test/data/${errorFile}`, 'utf8'))
         } catch (e) {
           expect(e).toMatch(/inconsistent types/)
         }
@@ -93,7 +89,7 @@ describe('GFF3 parser', () => {
 
   it('can parse a string synchronously', () => {
     const gff3 = fs.readFileSync('test/data/spec_eden.gff3').toString('utf8')
-    const result = gff.parseStringSync(gff3, {
+    const result = parseStringSync(gff3, {
       parseFeatures: true,
       parseDirectives: true,
       parseComments: true,
@@ -107,7 +103,7 @@ describe('GFF3 parser', () => {
 SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	 multivalue = val1,val2, val3;testing = blah
 `
 
-    const result = gff.parseStringSync(gff3, {
+    const result = parseStringSync(gff3, {
       parseFeatures: true,
       parseDirectives: true,
       parseComments: true,
@@ -141,7 +137,7 @@ SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	 multivalue = val1
 SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	Alias=Solyc01g098840;ID=gene:Solyc01g098840.2;Name=Solyc01g098840.2;from_BOGAS=1;length=5178
 `
 
-    const result = gff.parseStringSync(gff3, {
+    const result = parseStringSync(gff3, {
       parseFeatures: true,
       parseDirectives: true,
       parseComments: true,
@@ -208,7 +204,7 @@ SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	Alias=Solyc01g0988
     ] as const
   ).forEach(([filename, expectedOutput]) => {
     it(`can parse FASTA sections in hybrid ${filename} file`, async () => {
-      const stuff = gff.parseStringSync(
+      const stuff = parseStringSync(
         fs.readFileSync(`test/data/${filename}`, 'utf8'),
       )
       expect(stuff).toMatchSnapshot()
