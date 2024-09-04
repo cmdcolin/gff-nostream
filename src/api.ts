@@ -1,5 +1,12 @@
 import Parser from './parse'
-import { GFF3Item } from './util'
+import {
+  GFF3Comment,
+  GFF3Directive,
+  GFF3Feature,
+  GFF3Item,
+  GFF3Sequence,
+  parseFeature,
+} from './util'
 
 /** Parser options */
 export interface ParseOptions {
@@ -24,52 +31,27 @@ export interface ParseOptions {
 
 type ParseOptionsProcessed = Required<Omit<ParseOptions, 'parseAll'>>
 
-// shared arg processing for the parse routines
-function _processParseOptions(options: ParseOptions): ParseOptionsProcessed {
-  const out = {
-    encoding: 'utf8' as const,
-    parseFeatures: true,
-    parseDirectives: false,
-    parseSequences: true,
-    parseComments: false,
-    disableDerivesFromReferences: false,
-    ...options,
-  }
-
-  if (options.parseAll) {
-    out.parseFeatures = true
-    out.parseDirectives = true
-    out.parseComments = true
-    out.parseSequences = true
-  }
-
-  return out
-}
-
-export function parseStringSync(
-  str: string,
-  inputOptions: ParseOptions = {},
-): GFF3Item[] {
-  if (!str) {
-    return []
-  }
-
-  const options = _processParseOptions(inputOptions)
-  const items: GFF3Item[] = []
-  const push = items.push.bind(items)
-
+/**
+ * Synchronously parse a string containing GFF3 and return an array of the
+ * parsed items.
+ *
+ * @param str - GFF3 string
+ * @param inputOptions - Parsing options
+ * @returns array of parsed features, directives, comments and/or sequences
+ */
+export function parseStringSync(str: string): GFF3Feature[] {
+  const items: GFF3Feature[] = []
   const parser = new Parser({
-    featureCallback: options.parseFeatures ? push : undefined,
-    directiveCallback: options.parseDirectives ? push : undefined,
-    commentCallback: options.parseComments ? push : undefined,
-    sequenceCallback: options.parseSequences ? push : undefined,
-    disableDerivesFromReferences: options.disableDerivesFromReferences || false,
+    featureCallback: arg => items.push(arg),
+    disableDerivesFromReferences: true,
     errorCallback: err => {
       throw err
     },
   })
 
-  str.split(/\r?\n/).forEach(parser.addLine.bind(parser))
+  for (const line of str.split(/\r?\n/)) {
+    parser.addLine(line)
+  }
   parser.finish()
 
   return items

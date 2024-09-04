@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'fs'
 import { parseStringSync } from '../src'
-import { formatFeature } from '../src/util'
 
 describe('GFF3 parser', () => {
   it('can parse gff3_with_syncs.gff3', async () => {
@@ -53,15 +52,14 @@ describe('GFF3 parser', () => {
     const stuff = parseStringSync(
       fs.readFileSync('test/data/refGene_excerpt.gff3', 'utf8'),
     )
-    expect(true).toBeTruthy()
-    expect(stuff).toHaveLength(2)
+    expect(stuff).toMatchSnapshot()
   })
 
   it('can parse an excerpt of the TAIR10 gff3', async () => {
     const stuff = parseStringSync(
       fs.readFileSync('test/data/tair10.gff3', 'utf8'),
     )
-    expect(stuff).toHaveLength(3)
+    expect(stuff).toMatchSnapshot()
   })
 
   it('can parse chr1 TAIR10 gff3', async () => {
@@ -71,7 +69,6 @@ describe('GFF3 parser', () => {
         disableDerivesFromReferences: true,
       },
     )
-    expect(stuff).toHaveLength(17697)
   })
 
   // check that some files throw a parse error
@@ -89,12 +86,7 @@ describe('GFF3 parser', () => {
 
   it('can parse a string synchronously', () => {
     const gff3 = fs.readFileSync('test/data/spec_eden.gff3').toString('utf8')
-    const result = parseStringSync(gff3, {
-      parseFeatures: true,
-      parseDirectives: true,
-      parseComments: true,
-    })
-    expect(result).toHaveLength(3)
+    const result = parseStringSync(gff3)
     expect(result).toMatchSnapshot()
   })
 
@@ -103,12 +95,7 @@ describe('GFF3 parser', () => {
 SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	 multivalue = val1,val2, val3;testing = blah
 `
 
-    const result = parseStringSync(gff3, {
-      parseFeatures: true,
-      parseDirectives: true,
-      parseComments: true,
-    })
-    expect(result).toHaveLength(1)
+    const result = parseStringSync(gff3)
     const referenceResult = [
       [
         {
@@ -137,38 +124,8 @@ SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	 multivalue = val1
 SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	Alias=Solyc01g098840;ID=gene:Solyc01g098840.2;Name=Solyc01g098840.2;from_BOGAS=1;length=5178
 `
 
-    const result = parseStringSync(gff3, {
-      parseFeatures: true,
-      parseDirectives: true,
-      parseComments: true,
-    })
-    expect(result).toHaveLength(1)
-    const referenceResult = [
-      [
-        {
-          seq_id: 'SL2.40%ch01',
-          source: 'IT%AG eugene',
-          type: 'g%e;ne',
-          start: 80999140,
-          end: 81004317,
-          score: null,
-          strand: '+',
-          phase: null,
-          attributes: {
-            Alias: ['Solyc01g098840'],
-            ID: ['gene:Solyc01g098840.2'],
-            Name: ['Solyc01g098840.2'],
-            from_BOGAS: ['1'],
-            length: ['5178'],
-          },
-          child_features: [],
-          derived_features: [],
-        },
-      ],
-    ]
-
-    expect(result).toEqual(referenceResult)
-    expect(`\n${formatFeature(referenceResult[0])}`).toEqual(gff3)
+    const result = parseStringSync(gff3)
+    expect(result).toMatchSnapshot()
   })
   ;(
     [

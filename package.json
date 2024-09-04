@@ -1,6 +1,6 @@
 {
   "name": "gff-nostream",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "utilities to read GFF3 data",
   "license": "MIT",
   "repository": "cmdcolin/gff-nostream",

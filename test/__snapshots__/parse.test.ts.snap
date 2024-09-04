@@ -20410,19 +20410,6 @@ exports[`GFF3 parser > can cursorily parse hybrid1.gff3 1`] = `
       "type": "mRNA",
     },
   ],
-  {
-    "id": "A00469",
-    "sequence": "GATTACAGATTACA",
-  },
-  {
-    "id": "zonker",
-    "sequence": "AAAAAACTAGCATGATCGATCGATCGATCGATATTAGCATGCATGCATGATGATGATAGCTATGATCGATCCCCCCCAAAAAACTAGCATGATCGATCGATCGATCGATATTAGCATGCATGCATGATGATGATAGCTATGATCGATCCCCCCC",
-  },
-  {
-    "description": "this is a test description",
-    "id": "zeebo",
-    "sequence": "AAAAACTAGTAGCTAGCTAGCTGATCATAGATCGATGCATGGCATACTGACTGATCGACCCCCC",
-  },
 ]
 `;
 
@@ -20558,10 +20545,6 @@ exports[`GFF3 parser > can cursorily parse hybrid2.gff3 1`] = `
       "type": "mRNA",
     },
   ],
-  {
-    "id": "A00469",
-    "sequence": "GATTACAWATTACABATTACAGATTACA",
-  },
 ]
 `;
 
@@ -20900,10 +20883,6 @@ exports[`GFF3 parser > can cursorily parse knownGene.gff3 1`] = `
       "type": "match",
     },
   ],
-  {
-    "id": "A00469",
-    "sequence": "GATTACAGATTACA",
-  },
 ]
 `;
 
@@ -21242,10 +21221,6 @@ exports[`GFF3 parser > can cursorily parse knownGene2.gff3 1`] = `
       "type": "match",
     },
   ],
-  {
-    "id": "A00469",
-    "sequence": "GATTACAGATTACA",
-  },
 ]
 `;
 
@@ -53503,19 +53478,6 @@ exports[`GFF3 parser > can parse FASTA sections in hybrid hybrid1.gff3 file 1`] 
       "type": "mRNA",
     },
   ],
-  {
-    "id": "A00469",
-    "sequence": "GATTACAGATTACA",
-  },
-  {
-    "id": "zonker",
-    "sequence": "AAAAAACTAGCATGATCGATCGATCGATCGATATTAGCATGCATGCATGATGATGATAGCTATGATCGATCCCCCCCAAAAAACTAGCATGATCGATCGATCGATCGATATTAGCATGCATGCATGATGATGATAGCTATGATCGATCCCCCCC",
-  },
-  {
-    "description": "this is a test description",
-    "id": "zeebo",
-    "sequence": "AAAAACTAGTAGCTAGCTAGCTGATCATAGATCGATGCATGGCATACTGACTGATCGACCCCCC",
-  },
 ]
 `;
 
@@ -53651,26 +53613,11 @@ exports[`GFF3 parser > can parse FASTA sections in hybrid hybrid2.gff3 file 1`] 
       "type": "mRNA",
     },
   ],
-  {
-    "id": "A00469",
-    "sequence": "GATTACAWATTACABATTACAGATTACA",
-  },
 ]
 `;
 
 exports[`GFF3 parser > can parse a string synchronously 1`] = `
 [
-  {
-    "directive": "gff-version",
-    "value": "3",
-  },
-  {
-    "directive": "sequence-region",
-    "end": "1497228",
-    "seq_id": "ctg123",
-    "start": "1",
-    "value": "ctg123 1 1497228",
-  },
   [
     {
       "attributes": {
@@ -54273,6 +54220,1901 @@ exports[`GFF3 parser > can parse a string synchronously 1`] = `
       "start": 1000,
       "strand": "+",
       "type": "gene",
+    },
+  ],
+]
+`;
+
+exports[`GFF3 parser > can parse an excerpt of the TAIR10 gff3 1`] = `
+[
+  [
+    {
+      "attributes": {
+        "ID": [
+          "Chr1",
+        ],
+        "Name": [
+          "Chr1",
+        ],
+      },
+      "child_features": [],
+      "derived_features": [],
+      "end": 30427671,
+      "phase": null,
+      "score": null,
+      "seq_id": "1",
+      "source": "TAIR10",
+      "start": 1,
+      "strand": null,
+      "type": "chromosome",
+    },
+  ],
+  [
+    {
+      "attributes": {
+        "ID": [
+          "AT1G01010",
+        ],
+        "Name": [
+          "AT1G01010",
+        ],
+        "Note": [
+          "protein_coding_gene",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "ID": [
+                "AT1G01010.1",
+              ],
+              "Index": [
+                "1",
+              ],
+              "Name": [
+                "AT1G01010.1",
+              ],
+              "Parent": [
+                "AT1G01010",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 3913,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 3631,
+                  "strand": "+",
+                  "type": "exon",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 3759,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 3631,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                      "AT1G01010.1-Protein",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 3913,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 3760,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 4276,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 3996,
+                  "strand": "+",
+                  "type": "exon",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                      "AT1G01010.1-Protein",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 4276,
+                  "phase": "2",
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 3996,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 4605,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 4486,
+                  "strand": "+",
+                  "type": "exon",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                      "AT1G01010.1-Protein",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 4605,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 4486,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 5095,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 4706,
+                  "strand": "+",
+                  "type": "exon",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                      "AT1G01010.1-Protein",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 5095,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 4706,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 5326,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 5174,
+                  "strand": "+",
+                  "type": "exon",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                      "AT1G01010.1-Protein",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 5326,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 5174,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 5899,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 5439,
+                  "strand": "+",
+                  "type": "exon",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                      "AT1G01010.1-Protein",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 5630,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 5439,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01010.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 5899,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 5631,
+                  "strand": "+",
+                  "type": "three_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 5899,
+            "phase": null,
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 3631,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 5899,
+      "phase": null,
+      "score": null,
+      "seq_id": "1",
+      "source": "TAIR10",
+      "start": 3631,
+      "strand": "+",
+      "type": "gene",
+    },
+  ],
+  [
+    {
+      "attributes": {
+        "Derives_from": [
+          "AT1G01010.1",
+        ],
+        "ID": [
+          "AT1G01010.1-Protein",
+        ],
+        "Name": [
+          "AT1G01010.1",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "Parent": [
+                "AT1G01010.1",
+                "AT1G01010.1-Protein",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 3913,
+            "phase": "0",
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 3760,
+            "strand": "+",
+            "type": "CDS",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "Parent": [
+                "AT1G01010.1",
+                "AT1G01010.1-Protein",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 4276,
+            "phase": "2",
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 3996,
+            "strand": "+",
+            "type": "CDS",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "Parent": [
+                "AT1G01010.1",
+                "AT1G01010.1-Protein",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 4605,
+            "phase": "0",
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 4486,
+            "strand": "+",
+            "type": "CDS",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "Parent": [
+                "AT1G01010.1",
+                "AT1G01010.1-Protein",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 5095,
+            "phase": "0",
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 4706,
+            "strand": "+",
+            "type": "CDS",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "Parent": [
+                "AT1G01010.1",
+                "AT1G01010.1-Protein",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 5326,
+            "phase": "0",
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 5174,
+            "strand": "+",
+            "type": "CDS",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "Parent": [
+                "AT1G01010.1",
+                "AT1G01010.1-Protein",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 5630,
+            "phase": "0",
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 5439,
+            "strand": "+",
+            "type": "CDS",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 5630,
+      "phase": null,
+      "score": null,
+      "seq_id": "1",
+      "source": "TAIR10",
+      "start": 3760,
+      "strand": "+",
+      "type": "protein",
+    },
+  ],
+  [
+    {
+      "attributes": {
+        "ID": [
+          "AT1G01020",
+        ],
+        "Name": [
+          "AT1G01020",
+        ],
+        "Note": [
+          "protein_coding_gene",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "ID": [
+                "AT1G01020.1",
+              ],
+              "Index": [
+                "1",
+              ],
+              "Name": [
+                "AT1G01020.1",
+              ],
+              "Parent": [
+                "AT1G01020",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01020.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 8737,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 8667,
+                  "strand": "-",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01020.1",
+                      "AT1G01020.1-Protein",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 8666,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 8571,
+                  "strand": "-",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "AT1G01020.1",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 8737,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "1",
+                  "source": "TAIR10",
+                  "start": 8571,
+                  "strand": "-",
+                  "type": "exon",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 8737,
+            "phase": null,
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 5928,
+            "strand": "-",
+            "type": "mRNA",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 8737,
+      "phase": null,
+      "score": null,
+      "seq_id": "1",
+      "source": "TAIR10",
+      "start": 5928,
+      "strand": "-",
+      "type": "gene",
+    },
+  ],
+  [
+    {
+      "attributes": {
+        "Derives_from": [
+          "AT1G01020.1",
+        ],
+        "ID": [
+          "AT1G01020.1-Protein",
+        ],
+        "Name": [
+          "AT1G01020.1",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "Parent": [
+                "AT1G01020.1",
+                "AT1G01020.1-Protein",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 8666,
+            "phase": "0",
+            "score": null,
+            "seq_id": "1",
+            "source": "TAIR10",
+            "start": 8571,
+            "strand": "-",
+            "type": "CDS",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 8666,
+      "phase": null,
+      "score": null,
+      "seq_id": "1",
+      "source": "TAIR10",
+      "start": 6915,
+      "strand": "-",
+      "type": "protein",
+    },
+  ],
+]
+`;
+
+exports[`GFF3 parser > can parse an excerpt of the refGene gff3 1`] = `
+[
+  [
+    {
+      "attributes": {
+        "ID": [
+          "APITD1",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NM_199294",
+              ],
+              "Parent": [
+                "APITD1",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199294",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10490573,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490158,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199294",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10490625,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490574,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199294",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494022,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10493898,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199294",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494747,
+                  "phase": "1",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10494713,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199294",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": "2",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199294",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10502462,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10502321,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199294",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10502872,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10502463,
+                  "strand": "+",
+                  "type": "three_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10502872,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490158,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NR_036462",
+              ],
+              "Parent": [
+                "APITD1",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491458,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490803,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494022,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10493898,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494747,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10494713,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10502872,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10502321,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10502872,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490803,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 10502872,
+      "phase": null,
+      "score": null,
+      "seq_id": "chr1",
+      "source": "ngsutils",
+      "start": 10490158,
+      "strand": "+",
+      "type": "gene",
+    },
+    {
+      "attributes": {
+        "ID": [
+          "APITD1",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NR_036462",
+              ],
+              "Parent": [
+                "APITD1",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491458,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490803,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494022,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10493898,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494747,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10494713,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_036462",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10502872,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10502321,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10502872,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490803,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 10502872,
+      "phase": null,
+      "score": null,
+      "seq_id": "chr1",
+      "source": "ngsutils",
+      "start": 10490803,
+      "strand": "+",
+      "type": "gene",
+    },
+  ],
+  [
+    {
+      "attributes": {
+        "ID": [
+          "APITD1-CORT",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NM_198544",
+              ],
+              "Parent": [
+                "APITD1-CORT",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_198544",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10490573,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490158,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_198544",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10490625,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490574,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_198544",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494022,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10493898,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_198544",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494747,
+                  "phase": "1",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10494713,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_198544",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": "2",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_198544",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10511652,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511433,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_198544",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10512060,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511653,
+                  "strand": "+",
+                  "type": "three_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10512060,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490158,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NM_199006",
+              ],
+              "Parent": [
+                "APITD1-CORT",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199006",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10490573,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490158,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199006",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10490625,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490574,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199006",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494022,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10493898,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199006",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494747,
+                  "phase": "1",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10494713,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199006",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10511458,
+                  "phase": "2",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511433,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_199006",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10512060,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511459,
+                  "strand": "+",
+                  "type": "three_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10512060,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490158,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NM_001243768",
+              ],
+              "Parent": [
+                "APITD1-CORT",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491345,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490803,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491458,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10491346,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494747,
+                  "phase": "1",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10494713,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": "2",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10511652,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511433,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10512060,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511653,
+                  "strand": "+",
+                  "type": "three_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10512060,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490803,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NR_037187",
+              ],
+              "Parent": [
+                "APITD1-CORT",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_037187",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491458,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490803,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_037187",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_037187",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10512060,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511433,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10512060,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490803,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 10512060,
+      "phase": null,
+      "score": null,
+      "seq_id": "chr1",
+      "source": "ngsutils",
+      "start": 10490158,
+      "strand": "+",
+      "type": "gene",
+    },
+    {
+      "attributes": {
+        "ID": [
+          "APITD1-CORT",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NM_001243768",
+              ],
+              "Parent": [
+                "APITD1-CORT",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491345,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490803,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491458,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10491346,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10494747,
+                  "phase": "1",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10494713,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": "2",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10511652,
+                  "phase": "0",
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511433,
+                  "strand": "+",
+                  "type": "CDS",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NM_001243768",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10512060,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511653,
+                  "strand": "+",
+                  "type": "three_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10512060,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490803,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+        [
+          {
+            "attributes": {
+              "ID": [
+                "NR_037187",
+              ],
+              "Parent": [
+                "APITD1-CORT",
+              ],
+            },
+            "child_features": [
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_037187",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10491458,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10490803,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_037187",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10500470,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10500403,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+              [
+                {
+                  "attributes": {
+                    "Parent": [
+                      "NR_037187",
+                    ],
+                  },
+                  "child_features": [],
+                  "derived_features": [],
+                  "end": 10512060,
+                  "phase": null,
+                  "score": null,
+                  "seq_id": "chr1",
+                  "source": "ngsutils",
+                  "start": 10511433,
+                  "strand": "+",
+                  "type": "five_prime_UTR",
+                },
+              ],
+            ],
+            "derived_features": [],
+            "end": 10512060,
+            "phase": null,
+            "score": null,
+            "seq_id": "chr1",
+            "source": "ngsutils",
+            "start": 10490803,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 10512060,
+      "phase": null,
+      "score": null,
+      "seq_id": "chr1",
+      "source": "ngsutils",
+      "start": 10490803,
+      "strand": "+",
+      "type": "gene",
+    },
+  ],
+]
+`;
+
+exports[`GFF3 parser > can parse another string synchronously 1`] = `
+[
+  [
+    {
+      "attributes": {
+        "Alias": [
+          "Solyc01g098840",
+        ],
+        "ID": [
+          "gene:Solyc01g098840.2",
+        ],
+        "Name": [
+          "Solyc01g098840.2",
+        ],
+        "from_BOGAS": [
+          "1",
+        ],
+        "length": [
+          "5178",
+        ],
+      },
+      "child_features": [],
+      "derived_features": [],
+      "end": 81004317,
+      "phase": null,
+      "score": null,
+      "seq_id": "SL2.40%ch01",
+      "source": "IT%AG eugene",
+      "start": 80999140,
+      "strand": "+",
+      "type": "g%e;ne",
     },
   ],
 ]
@@ -55612,60 +57454,7 @@ exports[`GFF3 parser > supports children before parents, and Derives_from 1`] = 
           },
         ],
       ],
-      "derived_features": [
-        [
-          {
-            "attributes": {
-              "Derives_from": [
-                "A00469",
-              ],
-              "Note": [
-                "crazy multi-parent out-of-order thing, also including a Derives_from",
-              ],
-              "Parent": [
-                "AB000114",
-                "A00469",
-              ],
-            },
-            "child_features": [],
-            "derived_features": [],
-            "end": 500,
-            "phase": "2",
-            "score": null,
-            "seq_id": "chr17",
-            "source": "UCSC",
-            "start": 1,
-            "strand": "-",
-            "type": "fakething",
-          },
-        ],
-        [
-          {
-            "attributes": {
-              "Derives_from": [
-                "A00469",
-              ],
-              "Note": [
-                "crazy multi-parent thing, but this time coming after its parents",
-              ],
-              "Parent": [
-                "AB000114",
-                "A00469",
-              ],
-            },
-            "child_features": [],
-            "derived_features": [],
-            "end": 500,
-            "phase": "2",
-            "score": null,
-            "seq_id": "chr17",
-            "source": "UCSC",
-            "start": 1,
-            "strand": "-",
-            "type": "otherfakething",
-          },
-        ],
-      ],
+      "derived_features": [],
       "end": 62469545,
       "phase": null,
       "score": null,
@@ -56035,9 +57824,5 @@ exports[`GFF3 parser > supports children before parents, and Derives_from 1`] = 
       "type": "match",
     },
   ],
-  {
-    "id": "A00469",
-    "sequence": "GATTACAGATTACA",
-  },
 ]
 `;
