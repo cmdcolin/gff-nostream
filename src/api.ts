@@ -1,35 +1,5 @@
 import Parser from './parse'
-import {
-  GFF3Comment,
-  GFF3Directive,
-  GFF3Feature,
-  GFF3Item,
-  GFF3Sequence,
-  parseFeature,
-} from './util'
-
-/** Parser options */
-export interface ParseOptions {
-  /** Whether to resolve references to derives from features */
-  disableDerivesFromReferences?: boolean
-  /** Text encoding of the input GFF3. default 'utf8' */
-  encoding?: BufferEncoding
-  /** Whether to parse features, default true */
-  parseFeatures?: boolean
-  /** Whether to parse directives, default false */
-  parseDirectives?: boolean
-  /** Whether to parse comments, default false */
-  parseComments?: boolean
-  /** Whether to parse sequences, default true */
-  parseSequences?: boolean
-  /**
-   * Parse all features, directives, comments, and sequences. Overrides other
-   * parsing options. Default false.
-   */
-  parseAll?: boolean
-}
-
-type ParseOptionsProcessed = Required<Omit<ParseOptions, 'parseAll'>>
+import { GFF3Feature } from './util'
 
 /**
  * Synchronously parse a string containing GFF3 and return an array of the
