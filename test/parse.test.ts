@@ -1,3 +1,4 @@
+import { parse, test } from 'vitest'
 import fs from 'fs'
 import gff from '../src'
 import {
@@ -37,7 +38,6 @@ function readAll(
           parseDirectives: true,
           parseComments: true,
           parseSequences: true,
-          bufferSize: 10,
           ...args,
         }),
       )

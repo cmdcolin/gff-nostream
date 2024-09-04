@@ -1,43 +1,24 @@
-import prettier from 'eslint-plugin-prettier'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
-
-export default [
-  ...compat.extends(
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:@typescript-eslint/stylistic-type-checked',
-    'plugin:prettier/recommended',
-    'plugin:unicorn/recommended',
-  ),
+export default tseslint.config(
   {
-    plugins: {
-      prettier,
-      '@typescript-eslint': typescriptEslint,
-    },
-
+    ignores: ['esm/**/*', 'dist/**/*', '*.js', '*.mjs', 'example/*'],
+  },
+  {
     languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: 'script',
-
       parserOptions: {
-        project: './tsconfig.lint.json',
+        project: ['./tsconfig.lint.json'],
+        tsconfigRootDir: import.meta.dirname,
       },
     },
-
+  },
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...tseslint.configs.stylisticTypeChecked,
+  ...tseslint.configs.strictTypeChecked,
+  eslintPluginUnicorn.configs['flat/recommended'],
+  {
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
@@ -105,4 +86,4 @@ export default [
       '@typescript-eslint/require-await': 'off',
     },
   },
-]
+)
