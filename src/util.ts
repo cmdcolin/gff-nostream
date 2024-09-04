@@ -14,7 +14,7 @@ export function unescape(stringVal: string): string {
 }
 
 function _escape(regex: RegExp, s: string | number) {
-  return String(s).replace(regex, (ch) => {
+  return String(s).replace(regex, ch => {
     const hex = ch.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')
     return `%${hex}`
   })
@@ -56,7 +56,7 @@ export function parseAttributes(attrString: string): GFF3Attributes {
   attrString
     .replace(/\r?\n$/, '')
     .split(';')
-    .forEach((a) => {
+    .forEach(a => {
       const nv = a.split('=', 2)
       if (!nv[1]?.length) {
         return
@@ -72,7 +72,7 @@ export function parseAttributes(attrString: string): GFF3Attributes {
       arec.push(
         ...nv[1]
           .split(',')
-          .map((s) => s.trim())
+          .map(s => s.trim())
           .map(unescape),
       )
     })
@@ -87,7 +87,7 @@ export function parseAttributes(attrString: string): GFF3Attributes {
  */
 export function parseFeature(line: string): GFF3FeatureLine {
   // split the line into columns and replace '.' with null in each column
-  const f = line.split('\t').map((a) => (a === '.' || a === '' ? null : a))
+  const f = line.split('\t').map(a => (a === '.' || a === '' ? null : a))
 
   // unescape only the ref, source, and type columns
   const parsed: GFF3FeatureLine = {
@@ -219,14 +219,14 @@ function _formatFeature(
   seenFeature: Record<string, boolean | undefined>,
 ): string {
   if (Array.isArray(feature)) {
-    return feature.map((f) => _formatFeature(f, seenFeature)).join('')
+    return feature.map(f => _formatFeature(f, seenFeature)).join('')
   }
 
   const strings = [_formatSingleFeature(feature, seenFeature)]
   if (_isFeatureLineWithRefs(feature)) {
     strings.push(
-      ...feature.child_features.map((f) => _formatFeature(f, seenFeature)),
-      ...feature.derived_features.map((f) => _formatFeature(f, seenFeature)),
+      ...feature.child_features.map(f => _formatFeature(f, seenFeature)),
+      ...feature.derived_features.map(f => _formatFeature(f, seenFeature)),
     )
   }
   return strings.join('')

@@ -76,7 +76,7 @@ describe('GFF3 parser', () => {
 
   // check that some files throw a parse error
   ;['mm9_sample_ensembl.gff3', 'Saccharomyces_cerevisiae_EF3_e64.gff3'].forEach(
-    (errorFile) => {
+    errorFile => {
       it(`throws an error when parsing ${errorFile}`, async () => {
         try {
           parseStringSync(fs.readFileSync(`test/data/${errorFile}`, 'utf8'))

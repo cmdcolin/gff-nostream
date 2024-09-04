@@ -189,16 +189,16 @@ export default class Parser {
     const _unbufferItem = (item?: GFF3.GFF3Feature) => {
       if (item && Array.isArray(item) && item[0].attributes?.ID?.[0]) {
         const ids = item[0].attributes.ID
-        ids.forEach((id) => {
+        ids.forEach(id => {
           delete this._underConstructionById[id]
           delete this._completedReferences[id]
         })
-        item.forEach((i) => {
+        item.forEach(i => {
           if (i.child_features) {
-            i.child_features.forEach((c) => _unbufferItem(c))
+            i.child_features.forEach(c => _unbufferItem(c))
           }
           if (i.derived_features) {
-            i.derived_features.forEach((d) => _unbufferItem(d))
+            i.derived_features.forEach(d => _unbufferItem(d))
           }
         })
       }
@@ -263,7 +263,7 @@ export default class Parser {
     }
 
     let feature: GFF3.GFF3Feature | undefined = undefined
-    ids.forEach((id) => {
+    ids.forEach(id => {
       const existing = this._underConstructionById[id]
       if (existing) {
         // another location of the same feature
@@ -310,10 +310,10 @@ export default class Parser {
     if (!references) {
       return
     }
-    feature.forEach((loc) => {
+    feature.forEach(loc => {
       loc.child_features.push(...references.Parent)
     })
-    feature.forEach((loc) => {
+    feature.forEach(loc => {
       loc.derived_features.push(...references.Derives_from)
     })
     delete this._underConstructionOrphans[id]
@@ -345,16 +345,16 @@ export default class Parser {
       return returnVal
     }
 
-    references.Parent.forEach((toId) => {
+    references.Parent.forEach(toId => {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
         const pname = containerAttributes.Parent
         if (
-          !ids.filter((id) =>
+          !ids.filter(id =>
             postSet(this._completedReferences, id, `Parent,${toId}`),
           ).length
         ) {
-          otherFeature.forEach((location) => {
+          otherFeature.forEach(location => {
             location[pname].push(feature)
           })
         }
@@ -371,16 +371,16 @@ export default class Parser {
       }
     })
 
-    references.Derives_from.forEach((toId) => {
+    references.Derives_from.forEach(toId => {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
         const pname = containerAttributes.Derives_from
         if (
-          !ids.filter((id) =>
+          !ids.filter(id =>
             postSet(this._completedReferences, id, `Derives_from,${toId}`),
           ).length
         ) {
-          otherFeature.forEach((location) => {
+          otherFeature.forEach(location => {
             location[pname].push(feature)
           })
         }

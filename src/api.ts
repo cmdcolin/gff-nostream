@@ -64,7 +64,7 @@ export function parseStringSync(
     commentCallback: options.parseComments ? push : undefined,
     sequenceCallback: options.parseSequences ? push : undefined,
     disableDerivesFromReferences: options.disableDerivesFromReferences || false,
-    errorCallback: (err) => {
+    errorCallback: err => {
       throw err
     },
   })
