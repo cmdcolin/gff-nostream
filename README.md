@@ -3,7 +3,7 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/cmdcolin/gff-nostream/push.yml?branch=master&logo=github&style=for-the-badge)](https://github.com/cmdcolin/gff-nostream/actions?query=branch%3Amaster+workflow%3APush+)
 
 Parse GFF3 data. This is a simplified version of
-[@gmod/gff](https://github.com/GMOD/gff-js) for with just basic parsing and no
+[@gmod/gff](https://github.com/GMOD/gff-js) with just basic parsing and no
 node.js stream module usage
 
 ## Install
