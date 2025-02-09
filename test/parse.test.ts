@@ -75,7 +75,7 @@ describe('GFF3 parser', () => {
         try {
           parseStringSync(fs.readFileSync(`test/data/${errorFile}`, 'utf8'))
         } catch (e) {
-          expect(e).toMatch(/inconsistent types/)
+          expect(`${e}`).toMatch(/inconsistent types/)
         }
       })
     },
