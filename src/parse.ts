@@ -92,14 +92,14 @@ export default class Parser {
 
   constructor(args: ParserArgs) {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const nullFunc = () => {}
+    const undefinedFunc = () => {}
 
-    this.featureCallback = args.featureCallback || nullFunc
-    this.endCallback = args.endCallback || nullFunc
-    this.commentCallback = args.commentCallback || nullFunc
-    this.errorCallback = args.errorCallback || nullFunc
-    this.directiveCallback = args.directiveCallback || nullFunc
-    this.sequenceCallback = args.sequenceCallback || nullFunc
+    this.featureCallback = args.featureCallback || undefinedFunc
+    this.endCallback = args.endCallback || undefinedFunc
+    this.commentCallback = args.commentCallback || undefinedFunc
+    this.errorCallback = args.errorCallback || undefinedFunc
+    this.directiveCallback = args.directiveCallback || undefinedFunc
+    this.sequenceCallback = args.sequenceCallback || undefinedFunc
     this.disableDerivesFromReferences =
       args.disableDerivesFromReferences || false
 
@@ -190,16 +190,19 @@ export default class Parser {
       if (item && Array.isArray(item) && item[0].attributes?.ID?.[0]) {
         const ids = item[0].attributes.ID
         ids.forEach(id => {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete this._underConstructionById[id]
+
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete this._completedReferences[id]
         })
         item.forEach(i => {
-          if (i.child_features) {
-            i.child_features.forEach(c => _unbufferItem(c))
-          }
-          if (i.derived_features) {
-            i.derived_features.forEach(d => _unbufferItem(d))
-          }
+          i.child_features.forEach(c => {
+            _unbufferItem(c)
+          })
+          i.derived_features.forEach(d => {
+            _unbufferItem(d)
+          })
         })
       }
     }
@@ -263,14 +266,17 @@ export default class Parser {
     }
 
     let feature: GFF3.GFF3Feature | undefined = undefined
-    ids.forEach(id => {
+    for (const id of ids) {
       const existing = this._underConstructionById[id]
       if (existing) {
         // another location of the same feature
         if (existing[existing.length - 1].type !== featureLine.type) {
           this._parseError(
             `multi-line feature "${id}" has inconsistent types: "${
+              // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
               featureLine.type
+
+              // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
             }", "${existing[existing.length - 1].type}"`,
           )
         }
@@ -290,7 +296,7 @@ export default class Parser {
         // see if we have anything buffered that refers to it
         this._resolveReferencesTo(feature, id)
       }
-    })
+    }
 
     // try to resolve all its references
     this._resolveReferencesFrom(
@@ -316,11 +322,14 @@ export default class Parser {
     feature.forEach(loc => {
       loc.derived_features.push(...references.Derives_from)
     })
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._underConstructionOrphans[id]
   }
 
   private _parseError(message: string) {
     this.eof = true
+
+    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
     this.errorCallback(`${this.lineNumber}: ${message}`)
   }
 
