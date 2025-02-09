@@ -30,7 +30,7 @@ const arrayOfThings = gff.parseStringSync(stringOfGFF3)
 
 In GFF3, features can have more than one location. We parse features as
 arrayrefs of all the lines that share that feature's ID. Values that are `.` in
-the GFF3 are `null` in the output.
+the GFF3 are `undefined` in the output.
 
 A simple feature that's located in just one place:
 
@@ -38,13 +38,13 @@ A simple feature that's located in just one place:
 [
   {
     "seq_id": "ctg123",
-    "source": null,
+    "source": undefined,
     "type": "gene",
     "start": 1000,
     "end": 9000,
-    "score": null,
+    "score": undefined,
     "strand": "+",
-    "phase": null,
+    "phase": undefined,
     "attributes": {
       "ID": ["gene00001"],
       "Name": ["EDEN"]
@@ -61,11 +61,11 @@ A CDS called `cds00001` located in two places:
 [
   {
     "seq_id": "ctg123",
-    "source": null,
+    "source": undefined,
     "type": "CDS",
     "start": 1201,
     "end": 1500,
-    "score": null,
+    "score": undefined,
     "strand": "+",
     "phase": "0",
     "attributes": {
@@ -77,11 +77,11 @@ A CDS called `cds00001` located in two places:
   },
   {
     "seq_id": "ctg123",
-    "source": null,
+    "source": undefined,
     "type": "CDS",
     "start": 3000,
     "end": 3902,
-    "score": null,
+    "score": undefined,
     "strand": "+",
     "phase": "0",
     "attributes": {
