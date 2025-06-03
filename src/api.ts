@@ -15,7 +15,7 @@ export function parseStringSync(str: string): GFF3Feature[] {
     featureCallback: arg => items.push(arg),
     disableDerivesFromReferences: true,
     errorCallback: err => {
-      throw err
+      throw new Error(err)
     },
   })
 
@@ -28,11 +28,11 @@ export function parseStringSync(str: string): GFF3Feature[] {
 }
 
 export {
-  type GFF3FeatureLine,
   type GFF3Comment,
-  type GFF3FeatureLineWithRefs,
   type GFF3Directive,
-  type GFF3Sequence,
   type GFF3Feature,
+  type GFF3FeatureLine,
+  type GFF3FeatureLineWithRefs,
   type GFF3Item,
+  type GFF3Sequence,
 } from './util'

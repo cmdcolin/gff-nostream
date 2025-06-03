@@ -20,7 +20,7 @@ export class FASTAParser {
     const defMatch = /^>\s*(\S+)\s*(.*)/.exec(line)
     if (defMatch) {
       this._flush()
-      this.currentSequence = { id: defMatch[1], sequence: '' }
+      this.currentSequence = { id: defMatch[1]!, sequence: '' }
       if (defMatch[2]) {
         this.currentSequence.description = defMatch[2].trim()
       }
@@ -104,7 +104,7 @@ export default class Parser {
       args.disableDerivesFromReferences || false
 
     // number of lines to buffer
-    this.bufferSize = args.bufferSize === undefined ? 1000 : args.bufferSize
+    this.bufferSize = args.bufferSize === undefined ? Infinity : args.bufferSize
   }
 
   addLine(line: string): void {
@@ -129,8 +129,8 @@ export default class Parser {
     const match = /^\s*(#+)(.*)/.exec(line)
     if (match) {
       // directive or comment
-      const [, hashsigns] = match
-      let [, , contents] = match
+      let contents = match[2]!
+      const hashsigns = match[1]!
 
       if (hashsigns.length === 3) {
         // sync directive, all forward-references are resolved.
@@ -187,7 +187,7 @@ export default class Parser {
 
   private _enforceBufferSizeLimit(additionalItemCount = 0) {
     const _unbufferItem = (item?: GFF3.GFF3Feature) => {
-      if (item && Array.isArray(item) && item[0].attributes?.ID?.[0]) {
+      if (item && Array.isArray(item) && item[0]?.attributes?.ID?.[0]) {
         const ids = item[0].attributes.ID
         ids.forEach(id => {
           delete this._underConstructionById[id]
@@ -195,10 +195,14 @@ export default class Parser {
         })
         item.forEach(i => {
           if (i.child_features) {
-            i.child_features.forEach(c => _unbufferItem(c))
+            i.child_features.forEach(c => {
+              _unbufferItem(c)
+            })
           }
           if (i.derived_features) {
-            i.derived_features.forEach(d => _unbufferItem(d))
+            i.derived_features.forEach(d => {
+              _unbufferItem(d)
+            })
           }
         })
       }
@@ -267,11 +271,11 @@ export default class Parser {
       const existing = this._underConstructionById[id]
       if (existing) {
         // another location of the same feature
-        if (existing[existing.length - 1].type !== featureLine.type) {
+        if (existing[existing.length - 1]?.type !== featureLine.type) {
           this._parseError(
             `multi-line feature "${id}" has inconsistent types: "${
               featureLine.type
-            }", "${existing[existing.length - 1].type}"`,
+            }", "${existing[existing.length - 1]?.type}"`,
           )
         }
         existing.push(featureLine)
