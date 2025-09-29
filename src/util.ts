@@ -27,6 +27,7 @@ function _escape(regex: RegExp, s: string | number) {
  * @returns An escaped string value
  */
 export function escape(rawVal: string | number): string {
+  // eslint-disable-next-line no-control-regex
   return _escape(/[\n;\r\t=%&,\u0000-\u001f\u007f-\u00ff]/g, rawVal)
 }
 
@@ -37,6 +38,7 @@ export function escape(rawVal: string | number): string {
  * @returns An escaped column value
  */
 export function escapeColumn(rawVal: string | number): string {
+  // eslint-disable-next-line no-control-regex
   return _escape(/[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g, rawVal)
 }
 
@@ -165,6 +167,7 @@ export function formatAttributes(attrs: GFF3Attributes): string {
       return
     }
     let valstring
+    // eslint-disable-next-line no-prototype-builtins
     if (val.hasOwnProperty('toString')) {
       valstring = escape(val.toString())
       // } else if (Array.isArray(val.values)) {
@@ -184,6 +187,7 @@ function _formatSingleFeature(
   seenFeature: Record<string, boolean | undefined>,
 ) {
   const attrString =
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     f.attributes === null || f.attributes === undefined
       ? '.'
       : formatAttributes(f.attributes)
@@ -366,7 +370,9 @@ function _isFeatureLineWithRefs(
   featureLine: GFF3FeatureLine | GFF3FeatureLineWithRefs,
 ): featureLine is GFF3FeatureLineWithRefs {
   return (
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     (featureLine as GFF3FeatureLineWithRefs).child_features !== undefined &&
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     (featureLine as GFF3FeatureLineWithRefs).derived_features !== undefined
   )
 }

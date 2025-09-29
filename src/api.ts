@@ -15,7 +15,7 @@ export function parseStringSync(str: string): GFF3Feature[] {
     featureCallback: arg => items.push(arg),
     disableDerivesFromReferences: true,
     errorCallback: err => {
-      throw err
+      throw new Error(err)
     },
   })
 
@@ -41,7 +41,7 @@ export function parseArraySync(arr: string[]): GFF3Feature[] {
     featureCallback: arg => items.push(arg),
     disableDerivesFromReferences: true,
     errorCallback: err => {
-      throw err
+      throw new Error(err)
     },
   })
 
