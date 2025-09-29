@@ -104,7 +104,7 @@ export default class Parser {
       args.disableDerivesFromReferences || false
 
     // number of lines to buffer
-    this.bufferSize = args.bufferSize === undefined ? 1000 : args.bufferSize
+    this.bufferSize = args.bufferSize === undefined ? Infinity : args.bufferSize
   }
 
   addLine(line: string): void {

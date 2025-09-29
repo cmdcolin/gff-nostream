@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest'
 import fs from 'fs'
+
+import { describe, expect, it } from 'vitest'
+
 import { parseStringSync } from '../src'
 
 describe('GFF3 parser', () => {
@@ -25,7 +27,7 @@ describe('GFF3 parser', () => {
       [1, 'spec_match.gff3'],
       [8, 'quantitative.gff3'],
     ] as const
-  ).forEach(([count, filename]) => {
+  ).forEach(([_count, filename]) => {
     it(`can cursorily parse ${filename}`, async () => {
       const stuff = parseStringSync(
         fs.readFileSync(`test/data/${filename}`, 'utf8'),
@@ -63,12 +65,7 @@ describe('GFF3 parser', () => {
   })
 
   it('can parse chr1 TAIR10 gff3', async () => {
-    const stuff = parseStringSync(
-      fs.readFileSync('test/data/tair10_chr1.gff', 'utf8'),
-      {
-        disableDerivesFromReferences: true,
-      },
-    )
+    parseStringSync(fs.readFileSync('test/data/tair10_chr1.gff', 'utf8'))
   })
 
   // check that some files throw a parse error
@@ -159,7 +156,7 @@ SL2.40%25ch01	IT%25AG eugene	g%25e;ne	80999140	81004317	.	+	.	Alias=Solyc01g0988
         ],
       ],
     ] as const
-  ).forEach(([filename, expectedOutput]) => {
+  ).forEach(([filename]) => {
     it(`can parse FASTA sections in hybrid ${filename} file`, async () => {
       const stuff = parseStringSync(
         fs.readFileSync(`test/data/${filename}`, 'utf8'),
