@@ -27,6 +27,32 @@ export function parseStringSync(str: string): GFF3Feature[] {
   return items
 }
 
+/**
+ * Synchronously parse an array of strings containing GFF3 and return an array of the
+ * parsed items.
+ *
+ * @param arr - GFF3 array of strings
+ * @param inputOptions - Parsing options
+ * @returns array of parsed features, directives, comments and/or sequences
+ */
+export function parseArraySync(arr: string[]): GFF3Feature[] {
+  const items: GFF3Feature[] = []
+  const parser = new Parser({
+    featureCallback: arg => items.push(arg),
+    disableDerivesFromReferences: true,
+    errorCallback: err => {
+      throw err
+    },
+  })
+
+  for (const line of arr) {
+    parser.addLine(line)
+  }
+  parser.finish()
+
+  return items
+}
+
 export {
   type GFF3FeatureLine,
   type GFF3Comment,
