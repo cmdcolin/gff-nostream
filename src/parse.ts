@@ -194,11 +194,17 @@ export default class Parser {
           delete this._completedReferences[id]
         })
         item.forEach(i => {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (i.child_features) {
-            i.child_features.forEach(c => _unbufferItem(c))
+            i.child_features.forEach(c => {
+              _unbufferItem(c)
+            })
           }
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (i.derived_features) {
-            i.derived_features.forEach(d => _unbufferItem(d))
+            i.derived_features.forEach(d => {
+              _unbufferItem(d)
+            })
           }
         })
       }
@@ -294,6 +300,7 @@ export default class Parser {
 
     // try to resolve all its references
     this._resolveReferencesFrom(
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       feature || [featureLine],
       { Parent: parents, Derives_from: derives },
       ids,

@@ -54225,6 +54225,53 @@ exports[`GFF3 parser > can parse a string synchronously 1`] = `
 ]
 `;
 
+exports[`GFF3 parser > can parse an array of strings synchronously 1`] = `
+[
+  [
+    {
+      "attributes": {
+        "ID": [
+          "gene00001",
+        ],
+      },
+      "child_features": [
+        [
+          {
+            "attributes": {
+              "ID": [
+                "mRNA00001",
+              ],
+              "Parent": [
+                "gene00001",
+              ],
+            },
+            "child_features": [],
+            "derived_features": [],
+            "end": 9000,
+            "phase": null,
+            "score": null,
+            "seq_id": "ctg123",
+            "source": null,
+            "start": 1050,
+            "strand": "+",
+            "type": "mRNA",
+          },
+        ],
+      ],
+      "derived_features": [],
+      "end": 9000,
+      "phase": null,
+      "score": null,
+      "seq_id": "ctg123",
+      "source": null,
+      "start": 1000,
+      "strand": "+",
+      "type": "gene",
+    },
+  ],
+]
+`;
+
 exports[`GFF3 parser > can parse an excerpt of the TAIR10 gff3 1`] = `
 [
   [

@@ -1,5 +1,5 @@
-import { parseStringSync } from './api'
-export { parseStringSync }
+import { parseStringSync, parseArraySync } from './api'
+export { parseStringSync, parseArraySync }
 
 export type {
   GFF3Comment,
