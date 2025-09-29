@@ -1,6 +1,6 @@
 {
   "name": "gff-nostream",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "description": "utilities to read GFF3 data",
   "license": "MIT",
   "repository": "cmdcolin/gff-nostream",
@@ -20,14 +20,14 @@
     "test": "vitest",
     "clean": "rimraf dist esm",
     "lint": "eslint src test",
-    "docs": "documentation readme src/api.ts --section=API  --shallow && npm run format",
+    "docs": "documentation readme src/api.ts --section=API  --shallow && yarn format",
     "format": "prettier --write .",
-    "prebuild": "npm run clean",
+    "prebuild": "yarn clean",
     "build:esm": "tsc --target es2018 --outDir esm",
     "build:es5": "tsc --target es2015 --module commonjs --outDir dist",
     "postbuild:es5": "echo '{\"type\": \"commonjs\"}' > dist/package.json",
-    "build": "npm run build:es5 && npm run build:esm",
-    "prepublishOnly": "npm run test run && npm run build",
+    "build": "yarn build:es5 && yarn build:esm",
+    "prepublishOnly": "yarn test --run && yarn build",
     "postversion": "git push --follow-tags"
   },
   "keywords": [
