@@ -19,7 +19,7 @@
   "scripts": {
     "test": "vitest",
     "clean": "rimraf dist esm",
-    "lint": "eslint src test",
+    "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "docs": "documentation readme src/api.ts --section=API  --shallow && yarn format",
     "format": "prettier --write .",
     "prebuild": "yarn clean",

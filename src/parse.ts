@@ -195,10 +195,14 @@ export default class Parser {
         })
         item.forEach(i => {
           if (i.child_features) {
-            i.child_features.forEach(c => _unbufferItem(c))
+            i.child_features.forEach(c => {
+              _unbufferItem(c)
+            })
           }
           if (i.derived_features) {
-            i.derived_features.forEach(d => _unbufferItem(d))
+            i.derived_features.forEach(d => {
+              _unbufferItem(d)
+            })
           }
         })
       }

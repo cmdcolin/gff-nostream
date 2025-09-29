@@ -90,8 +90,8 @@ describe('GFF3 parser', () => {
   it('can parse an array of strings synchronously', () => {
     const gff3 = [
       '##gff-version 3',
-      'ctg123 . gene 1000 9000 . + . ID=gene00001',
-      'ctg123 . mRNA 1050 9000 . + . ID=mRNA00001;Parent=gene00001',
+      'ctg123	.	gene	1000	9000	.	+	.	ID=gene00001',
+      'ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA00001;Parent=gene00001',
     ]
     const result = parseArraySync(gff3)
     expect(result).toMatchSnapshot()
