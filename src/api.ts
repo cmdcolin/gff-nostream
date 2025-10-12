@@ -54,11 +54,11 @@ export function parseArraySync(arr: string[]): GFF3Feature[] {
 }
 
 export {
-  type GFF3FeatureLine,
   type GFF3Comment,
-  type GFF3FeatureLineWithRefs,
   type GFF3Directive,
-  type GFF3Sequence,
   type GFF3Feature,
+  type GFF3FeatureLine,
+  type GFF3FeatureLineWithRefs,
   type GFF3Item,
+  type GFF3Sequence,
 } from './util'

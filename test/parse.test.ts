@@ -2,7 +2,7 @@ import fs from 'fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { parseStringSync, parseArraySync } from '../src'
+import { parseArraySync, parseStringSync } from '../src'
 
 describe('GFF3 parser', () => {
   it('can parse gff3_with_syncs.gff3', async () => {
