@@ -278,72 +278,58 @@ export default class Parser {
     references: { Parent: string[]; Derives_from: string[] },
     ids: string[],
   ) {
-    // this is all a bit more awkward in javascript than it was in perl
-    function postSet(
-      obj: Record<string, Record<string, boolean | undefined> | undefined>,
-      slot1: string,
-      slot2: string,
-    ) {
-      let subObj = obj[slot1]
-      if (!subObj) {
-        subObj = {}
-        obj[slot1] = subObj
-      }
-      const returnVal = subObj[slot2] || false
-      subObj[slot2] = true
-      return returnVal
-    }
-
-    references.Parent.forEach(toId => {
+    for (const toId of references.Parent) {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
-        const pname = containerAttributes.Parent
-        if (
-          !ids.filter(id =>
-            postSet(this._completedReferences, id, `Parent,${toId}`),
-          ).length
-        ) {
-          otherFeature.forEach(location => {
-            location[pname].push(feature)
-          })
+        let dominated = false
+        for (const id of ids) {
+          const domKey = `Parent,${toId}`
+          const rec = this._completedReferences[id] || (this._completedReferences[id] = {})
+          if (rec[domKey]) {
+            dominated = true
+          }
+          rec[domKey] = true
+        }
+        if (!dominated) {
+          for (const location of otherFeature) {
+            location.child_features.push(feature)
+          }
         }
       } else {
         let ref = this._underConstructionOrphans[toId]
         if (!ref) {
-          ref = {
-            Parent: [],
-            Derives_from: [],
-          }
+          ref = { Parent: [], Derives_from: [] }
           this._underConstructionOrphans[toId] = ref
         }
         ref.Parent.push(feature)
       }
-    })
+    }
 
-    references.Derives_from.forEach(toId => {
+    for (const toId of references.Derives_from) {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
-        const pname = containerAttributes.Derives_from
-        if (
-          !ids.filter(id =>
-            postSet(this._completedReferences, id, `Derives_from,${toId}`),
-          ).length
-        ) {
-          otherFeature.forEach(location => {
-            location[pname].push(feature)
-          })
+        let dominated = false
+        for (const id of ids) {
+          const domKey = `Derives_from,${toId}`
+          const rec = this._completedReferences[id] || (this._completedReferences[id] = {})
+          if (rec[domKey]) {
+            dominated = true
+          }
+          rec[domKey] = true
+        }
+        if (!dominated) {
+          for (const location of otherFeature) {
+            location.derived_features.push(feature)
+          }
         }
       } else {
         let ref = this._underConstructionOrphans[toId]
         if (!ref) {
-          ref = {
-            Parent: [],
-            Derives_from: [],
-          }
+          ref = { Parent: [], Derives_from: [] }
           this._underConstructionOrphans[toId] = ref
         }
         ref.Derives_from.push(feature)
       }
-    })
+    }
   }
 }

@@ -6,6 +6,10 @@ const directiveRegex = /^\s*##\s*(\S+)\s*(.*)/
 const lineEndRegex = /\r?\n$/
 const whitespaceRegex = /\s+/
 const nonDigitRegex = /\D/g
+// eslint-disable-next-line no-control-regex
+const attrEscapeRegex = /[\n;\r\t=%&,\u0000-\u001f\u007f-\u00ff]/g
+// eslint-disable-next-line no-control-regex
+const columnEscapeRegex = /[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g
 
 /**
  * Unescape a string value used in a GFF3 attribute.
@@ -37,8 +41,7 @@ function _escape(regex: RegExp, s: string | number) {
  * @returns An escaped string value
  */
 export function escape(rawVal: string | number): string {
-  // eslint-disable-next-line no-control-regex
-  return _escape(/[\n;\r\t=%&,\u0000-\u001f\u007f-\u00ff]/g, rawVal)
+  return _escape(attrEscapeRegex, rawVal)
 }
 
 /**
@@ -48,8 +51,7 @@ export function escape(rawVal: string | number): string {
  * @returns An escaped column value
  */
 export function escapeColumn(rawVal: string | number): string {
-  // eslint-disable-next-line no-control-regex
-  return _escape(/[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g, rawVal)
+  return _escape(columnEscapeRegex, rawVal)
 }
 
 /**
@@ -194,23 +196,12 @@ export function parseDirective(
  */
 export function formatAttributes(attrs: GFF3Attributes): string {
   const attrOrder: string[] = []
-  Object.entries(attrs).forEach(([tag, val]) => {
+  for (const [tag, val] of Object.entries(attrs)) {
     if (!val) {
-      return
+      continue
     }
-    let valstring
-    // eslint-disable-next-line no-prototype-builtins
-    if (val.hasOwnProperty('toString')) {
-      valstring = escape(val.toString())
-      // } else if (Array.isArray(val.values)) {
-      //   valstring = val.values.map(escape).join(',')
-    } else if (Array.isArray(val)) {
-      valstring = val.map(escape).join(',')
-    } else {
-      valstring = escape(val)
-    }
-    attrOrder.push(`${escape(tag)}=${valstring}`)
-  })
+    attrOrder.push(`${escape(tag)}=${val.map(escape).join(',')}`)
+  }
   return attrOrder.length ? attrOrder.join(';') : '.'
 }
 
