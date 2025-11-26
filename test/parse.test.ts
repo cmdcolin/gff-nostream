@@ -2,7 +2,7 @@ import fs from 'fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { parseArraySync, parseStringSync } from '../src'
+import { parseArraySync, parseRecordsSync, parseStringSync } from '../src'
 
 describe('GFF3 parser', () => {
   it('can parse gff3_with_syncs.gff3', async () => {
@@ -95,6 +95,79 @@ describe('GFF3 parser', () => {
     ]
     const result = parseArraySync(gff3)
     expect(result).toMatchSnapshot()
+  })
+
+  it('can parse an array of LineRecord objects with lineHash', () => {
+    const records = [
+      {
+        fields: [
+          'ctg123',
+          '.',
+          'gene',
+          '1000',
+          '9000',
+          '.',
+          '+',
+          '.',
+          'ID=gene00001',
+        ],
+        lineHash: 'hash123',
+      },
+      {
+        fields: [
+          'ctg123',
+          '.',
+          'mRNA',
+          '1050',
+          '9000',
+          '.',
+          '+',
+          '.',
+          'ID=mRNA00001;Parent=gene00001',
+        ],
+        lineHash: 456,
+      },
+    ]
+    const result = parseRecordsSync(records)
+    expect(result.length).toBe(1)
+    expect(result[0]?.[0]?.attributes?._lineHash).toEqual(['hash123'])
+    expect(
+      result[0]?.[0]?.child_features[0]?.[0]?.attributes?._lineHash,
+    ).toEqual(['456'])
+  })
+
+  it('can parse LineRecord objects without lineHash', () => {
+    const records = [
+      {
+        fields: [
+          'ctg123',
+          '.',
+          'gene',
+          '1000',
+          '9000',
+          '.',
+          '+',
+          '.',
+          'ID=gene00001',
+        ],
+      },
+    ]
+    const result = parseRecordsSync(records)
+    expect(result.length).toBe(1)
+    expect(result[0]?.[0]?.attributes?._lineHash).toBeUndefined()
+    expect(result[0]?.[0]?.attributes?.ID).toEqual(['gene00001'])
+  })
+
+  it('can parse LineRecord objects with empty attributes', () => {
+    const records = [
+      {
+        fields: ['ctg123', '.', 'gene', '1000', '9000', '.', '+', '.', '.'],
+        lineHash: 'hashOnly',
+      },
+    ]
+    const result = parseRecordsSync(records)
+    expect(result.length).toBe(1)
+    expect(result[0]?.[0]?.attributes?._lineHash).toEqual(['hashOnly'])
   })
 
   it('can parse some whitespace', () => {

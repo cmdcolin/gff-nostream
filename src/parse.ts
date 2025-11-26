@@ -125,6 +125,44 @@ export default class Parser {
       this._bufferLine(line)
       return
     }
+
+    const match = /^\s*(#+)(.*)/.exec(line)
+    if (match) {
+      // directive or comment
+      const [, hashsigns] = match
+      let [, , contents] = match
+
+      if (hashsigns.length === 3) {
+        // sync directive, all forward-references are resolved.
+        this._emitAllUnderConstructionFeatures()
+      } else if (hashsigns.length === 2) {
+        const directive = GFF3.parseDirective(line)
+        if (directive) {
+          if (directive.directive === 'FASTA') {
+            this._emitAllUnderConstructionFeatures()
+            this.eof = true
+            this.fastaParser = new FASTAParser(this.sequenceCallback)
+          } else {
+            this._emitItem(directive)
+          }
+        }
+      } else {
+        contents = contents.replace(/\s*/, '')
+        this._emitItem({ comment: contents })
+      }
+    } else if (/^\s*$/.test(line)) {
+      // blank line, do nothing
+    } else if (/^\s*>/.test(line)) {
+      // implicit beginning of a FASTA section
+      this._emitAllUnderConstructionFeatures()
+      this.eof = true
+      this.fastaParser = new FASTAParser(this.sequenceCallback)
+      this.fastaParser.addLine(line)
+    } else {
+      // it's a parse error
+      const errLine = line.replaceAll(/\r?\n?$/g, '')
+      throw new Error(`GFF3 parse error.  Cannot parse '${errLine}'.`)
+    }
   }
 
   addParsedFeatureLine(featureLine: GFF3.GFF3FeatureLine): void {
@@ -214,67 +252,8 @@ export default class Parser {
     }
   }
 
-  // do the right thing with a newly-parsed feature line
   private _bufferLine(line: string) {
-    const rawFeatureLine = GFF3.parseFeature(line)
-    const featureLine: GFF3.GFF3FeatureLineWithRefs = {
-      ...rawFeatureLine,
-      child_features: [],
-      derived_features: [],
-    }
-    // featureLine._lineNumber = this.lineNumber //< debugging aid
-
-    // NOTE: a feature is an arrayref of one or more feature lines.
-    const ids = featureLine.attributes?.ID || []
-    const parents = featureLine.attributes?.Parent || []
-    const derives = this.disableDerivesFromReferences
-      ? []
-      : featureLine.attributes?.Derives_from || []
-
-    if (!ids.length && !parents.length && !derives.length) {
-      // if it has no IDs and does not refer to anything, we can just
-      // output it
-      this._emitItem([featureLine])
-      return
-    }
-
-    let feature: GFF3.GFF3Feature | undefined = undefined
-    ids.forEach(id => {
-      const existing = this._underConstructionById[id]
-      if (existing) {
-        // another location of the same feature
-        if (existing[existing.length - 1].type !== featureLine.type) {
-          this._parseError(
-            `multi-line feature "${id}" has inconsistent types: "${
-              featureLine.type
-            }", "${existing[existing.length - 1].type}"`,
-          )
-        }
-        existing.push(featureLine)
-        feature = existing
-      } else {
-        // haven't seen it yet, so buffer it so we can attach
-        // child features to it
-        feature = [featureLine]
-
-        this._enforceBufferSizeLimit(1)
-        if (!parents.length && !derives.length) {
-          this._underConstructionTopLevel.push(feature)
-        }
-        this._underConstructionById[id] = feature
-
-        // see if we have anything buffered that refers to it
-        this._resolveReferencesTo(feature, id)
-      }
-    })
-
-    // try to resolve all its references
-    this._resolveReferencesFrom(
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      feature || [featureLine],
-      { Parent: parents, Derives_from: derives },
-      ids,
-    )
+    this._bufferParsedLine(GFF3.parseFeature(line))
   }
 
   private _bufferParsedLine(rawFeatureLine: GFF3.GFF3FeatureLine) {

@@ -99,21 +99,32 @@ export function parseFeature(line: string): GFF3FeatureLine {
  * @param f - Array of 9 GFF3 column values (use null or '.' for empty values)
  * @returns The parsed feature
  */
-export function parseFieldsArray(f: (string | null)[]): GFF3FeatureLine {
-  // normalize '.' to null
-  const fields = f.map(a => (a === '.' || a === '' ? null : a))
+export function parseFieldsArray(f: (string | null | undefined)[]): GFF3FeatureLine {
+  // normalize '.', '', and undefined to null, handling missing indices
+  const normalize = (a: string | null | undefined) =>
+    a === '.' || a === '' || a === undefined ? null : a
+
+  const seq_id = normalize(f[0])
+  const source = normalize(f[1])
+  const type = normalize(f[2])
+  const start = normalize(f[3])
+  const end = normalize(f[4])
+  const score = normalize(f[5])
+  const strand = normalize(f[6])
+  const phase = normalize(f[7])
+  const attrString = normalize(f[8])
 
   // unescape only the ref, source, and type columns
   const parsed: GFF3FeatureLine = {
-    seq_id: fields[0] && unescape(fields[0]),
-    source: fields[1] && unescape(fields[1]),
-    type: fields[2] && unescape(fields[2]),
-    start: fields[3] === null ? null : parseInt(fields[3], 10),
-    end: fields[4] === null ? null : parseInt(fields[4], 10),
-    score: fields[5] === null ? null : parseFloat(fields[5]),
-    strand: fields[6],
-    phase: fields[7],
-    attributes: fields[8] === null ? null : parseAttributes(fields[8]),
+    seq_id: seq_id && unescape(seq_id),
+    source: source && unescape(source),
+    type: type && unescape(type),
+    start: start === null ? null : parseInt(start, 10),
+    end: end === null ? null : parseInt(end, 10),
+    score: score === null ? null : parseFloat(score),
+    strand,
+    phase,
+    attributes: attrString === null ? null : parseAttributes(attrString),
   }
   return parsed
 }
