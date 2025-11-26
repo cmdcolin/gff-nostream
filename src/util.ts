@@ -90,18 +90,30 @@ export function parseAttributes(attrString: string): GFF3Attributes {
 export function parseFeature(line: string): GFF3FeatureLine {
   // split the line into columns and replace '.' with null in each column
   const f = line.split('\t').map(a => (a === '.' || a === '' ? null : a))
+  return parseFieldsArray(f)
+}
+
+/**
+ * Parse a GFF3 feature from a pre-split fields array
+ *
+ * @param f - Array of 9 GFF3 column values (use null or '.' for empty values)
+ * @returns The parsed feature
+ */
+export function parseFieldsArray(f: (string | null)[]): GFF3FeatureLine {
+  // normalize '.' to null
+  const fields = f.map(a => (a === '.' || a === '' ? null : a))
 
   // unescape only the ref, source, and type columns
   const parsed: GFF3FeatureLine = {
-    seq_id: f[0] && unescape(f[0]),
-    source: f[1] && unescape(f[1]),
-    type: f[2] && unescape(f[2]),
-    start: f[3] === null ? null : parseInt(f[3], 10),
-    end: f[4] === null ? null : parseInt(f[4], 10),
-    score: f[5] === null ? null : parseFloat(f[5]),
-    strand: f[6],
-    phase: f[7],
-    attributes: f[8] === null ? null : parseAttributes(f[8]),
+    seq_id: fields[0] && unescape(fields[0]),
+    source: fields[1] && unescape(fields[1]),
+    type: fields[2] && unescape(fields[2]),
+    start: fields[3] === null ? null : parseInt(fields[3], 10),
+    end: fields[4] === null ? null : parseInt(fields[4], 10),
+    score: fields[5] === null ? null : parseFloat(fields[5]),
+    strand: fields[6],
+    phase: fields[7],
+    attributes: fields[8] === null ? null : parseAttributes(fields[8]),
   }
   return parsed
 }
