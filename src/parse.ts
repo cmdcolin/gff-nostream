@@ -73,13 +73,7 @@ export default class Parser {
   }
 
   addLine(line: string): void {
-    // if we have transitioned to a fasta section, just delegate to that parser
-    if (this.fastaParser) {
-      this.fastaParser.addLine(line)
-      return
-    }
     if (this.eof) {
-      // otherwise, if we are done, ignore this line
       return
     }
 
@@ -106,7 +100,6 @@ export default class Parser {
           if (directive.directive === 'FASTA') {
             this._emitAllUnderConstructionFeatures()
             this.eof = true
-            this.fastaParser = new FASTAParser(this.sequenceCallback)
           } else {
             this._emitItem(directive)
           }
@@ -118,11 +111,9 @@ export default class Parser {
     } else if (blankLineRegex.test(line)) {
       // blank line, do nothing
     } else if (fastaStartRegex.test(line)) {
-      // implicit beginning of a FASTA section
+      // implicit beginning of a FASTA section, stop parsing
       this._emitAllUnderConstructionFeatures()
       this.eof = true
-      this.fastaParser = new FASTAParser(this.sequenceCallback)
-      this.fastaParser.addLine(line)
     } else {
       // it's a parse error
       const errLine = line.replaceAll(lineEndingRegex, '')
@@ -140,9 +131,6 @@ export default class Parser {
 
   finish(): void {
     this._emitAllUnderConstructionFeatures()
-    if (this.fastaParser) {
-      this.fastaParser.finish()
-    }
     this.endCallback()
   }
 
