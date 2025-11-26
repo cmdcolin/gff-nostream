@@ -1,44 +1,15 @@
-import * as GFF3 from './util'
+import * as GFF3 from './util.ts'
 
 const containerAttributes = {
   Parent: 'child_features' as const,
   Derives_from: 'derived_features' as const,
 }
 
-export class FASTAParser {
-  seqCallback: (sequence: GFF3.GFF3Sequence) => void
-  currentSequence:
-    | { id: string; sequence: string; description?: string }
-    | undefined
-
-  constructor(seqCallback: (sequence: GFF3.GFF3Sequence) => void) {
-    this.seqCallback = seqCallback
-    this.currentSequence = undefined
-  }
-
-  addLine(line: string): void {
-    const defMatch = /^>\s*(\S+)\s*(.*)/.exec(line)
-    if (defMatch) {
-      this._flush()
-      this.currentSequence = { id: defMatch[1], sequence: '' }
-      if (defMatch[2]) {
-        this.currentSequence.description = defMatch[2].trim()
-      }
-    } else if (this.currentSequence && /\S/.test(line)) {
-      this.currentSequence.sequence += line.replaceAll(/\s/g, '')
-    }
-  }
-
-  private _flush() {
-    if (this.currentSequence) {
-      this.seqCallback(this.currentSequence)
-    }
-  }
-
-  finish(): void {
-    this._flush()
-  }
-}
+const featureLineRegex = /^\s*[^#\s>]/
+const commentOrDirectiveRegex = /^\s*(#+)(.*)/
+const blankLineRegex = /^\s*$/
+const fastaStartRegex = /^\s*>/
+const lineEndingRegex = /\r?\n?$/g
 
 interface ParserArgs {
   featureCallback?(feature: GFF3.GFF3Feature): void
@@ -46,7 +17,6 @@ interface ParserArgs {
   commentCallback?(comment: GFF3.GFF3Comment): void
   errorCallback?(error: string): void
   directiveCallback?(directive: GFF3.GFF3Directive): void
-  sequenceCallback?(sequence: GFF3.GFF3Sequence): void
   bufferSize?: number
   disableDerivesFromReferences?: boolean
 }
@@ -63,12 +33,7 @@ export default class Parser {
   errorCallback: (error: string) => void
   disableDerivesFromReferences: boolean
   directiveCallback: (directive: GFF3.GFF3Directive) => void
-  sequenceCallback: (sequence: GFF3.GFF3Sequence) => void
   bufferSize: number
-  fastaParser: FASTAParser | undefined = undefined
-  // if this is true, the parser ignores the
-  // rest of the lines in the file.  currently
-  // set when the file switches over to FASTA
   eof = false
   lineNumber = 0
   // features that we have to keep on hand for now because they
@@ -99,7 +64,6 @@ export default class Parser {
     this.commentCallback = args.commentCallback || nullFunc
     this.errorCallback = args.errorCallback || nullFunc
     this.directiveCallback = args.directiveCallback || nullFunc
-    this.sequenceCallback = args.sequenceCallback || nullFunc
     this.disableDerivesFromReferences =
       args.disableDerivesFromReferences || false
 
@@ -108,68 +72,63 @@ export default class Parser {
   }
 
   addLine(line: string): void {
-    // if we have transitioned to a fasta section, just delegate to that parser
-    if (this.fastaParser) {
-      this.fastaParser.addLine(line)
-      return
-    }
     if (this.eof) {
-      // otherwise, if we are done, ignore this line
       return
     }
 
     this.lineNumber += 1
 
-    if (/^\s*[^#\s>]/.test(line)) {
+    if (featureLineRegex.test(line)) {
       // feature line, most common case
       this._bufferLine(line)
       return
     }
 
-    const match = /^\s*(#+)(.*)/.exec(line)
+    const match = commentOrDirectiveRegex.exec(line)
     if (match) {
       // directive or comment
       const [, hashsigns] = match
       let [, , contents] = match
 
-      if (hashsigns.length === 3) {
+      if (hashsigns!.length === 3) {
         // sync directive, all forward-references are resolved.
         this._emitAllUnderConstructionFeatures()
-      } else if (hashsigns.length === 2) {
+      } else if (hashsigns!.length === 2) {
         const directive = GFF3.parseDirective(line)
         if (directive) {
           if (directive.directive === 'FASTA') {
             this._emitAllUnderConstructionFeatures()
             this.eof = true
-            this.fastaParser = new FASTAParser(this.sequenceCallback)
           } else {
             this._emitItem(directive)
           }
         }
       } else {
-        contents = contents.replace(/\s*/, '')
-        this._emitItem({ comment: contents })
+        this._emitItem({ comment: contents!.trimStart() })
       }
-    } else if (/^\s*$/.test(line)) {
+    } else if (blankLineRegex.test(line)) {
       // blank line, do nothing
-    } else if (/^\s*>/.test(line)) {
-      // implicit beginning of a FASTA section
+    } else if (fastaStartRegex.test(line)) {
+      // implicit beginning of a FASTA section, stop parsing
       this._emitAllUnderConstructionFeatures()
       this.eof = true
-      this.fastaParser = new FASTAParser(this.sequenceCallback)
-      this.fastaParser.addLine(line)
     } else {
       // it's a parse error
-      const errLine = line.replaceAll(/\r?\n?$/g, '')
+      const errLine = line.replaceAll(lineEndingRegex, '')
       throw new Error(`GFF3 parse error.  Cannot parse '${errLine}'.`)
     }
   }
 
+  addParsedFeatureLine(featureLine: GFF3.GFF3FeatureLine): void {
+    if (this.eof) {
+      return
+    }
+    this.lineNumber += 1
+    this._bufferParsedLine(featureLine)
+  }
+
   finish(): void {
     this._emitAllUnderConstructionFeatures()
-    if (this.fastaParser) {
-      this.fastaParser.finish()
-    }
     this.endCallback()
   }
 
@@ -235,26 +194,23 @@ export default class Parser {
 
     // if we have any orphans hanging around still, this is a
     // problem. die with a parse error
-    if (Array.from(Object.values(this._underConstructionOrphans)).length) {
+    const orphanKeys = Object.keys(this._underConstructionOrphans)
+    if (orphanKeys.length) {
       throw new Error(
-        `some features reference other features that do not exist in the file (or in the same '###' scope). ${Object.keys(
-          this._underConstructionOrphans,
-        ).join(',')}`,
+        `some features reference other features that do not exist in the file (or in the same '###' scope). ${orphanKeys.join(',')}`,
       )
     }
   }
 
-  // do the right thing with a newly-parsed feature line
   private _bufferLine(line: string) {
-    const rawFeatureLine = GFF3.parseFeature(line)
-    const featureLine: GFF3.GFF3FeatureLineWithRefs = {
-      ...rawFeatureLine,
-      child_features: [],
-      derived_features: [],
-    }
-    // featureLine._lineNumber = this.lineNumber //< debugging aid
+    this._bufferParsedLine(GFF3.parseFeature(line))
+  }
 
-    // NOTE: a feature is an arrayref of one or more feature lines.
+  private _bufferParsedLine(rawFeatureLine: GFF3.GFF3FeatureLine) {
+    const featureLine = rawFeatureLine as GFF3.GFF3FeatureLineWithRefs
+    featureLine.child_features = []
+    featureLine.derived_features = []
+
     const ids = featureLine.attributes?.ID || []
     const parents = featureLine.attributes?.Parent || []
     const derives = this.disableDerivesFromReferences
@@ -262,8 +218,6 @@ export default class Parser {
       : featureLine.attributes?.Derives_from || []
 
     if (!ids.length && !parents.length && !derives.length) {
-      // if it has no IDs and does not refer to anything, we can just
-      // output it
       this._emitItem([featureLine])
       return
     }
@@ -272,7 +226,6 @@ export default class Parser {
     ids.forEach(id => {
       const existing = this._underConstructionById[id]
       if (existing) {
-        // another location of the same feature
         if (existing[existing.length - 1].type !== featureLine.type) {
           this._parseError(
             `multi-line feature "${id}" has inconsistent types: "${
@@ -283,8 +236,6 @@ export default class Parser {
         existing.push(featureLine)
         feature = existing
       } else {
-        // haven't seen it yet, so buffer it so we can attach
-        // child features to it
         feature = [featureLine]
 
         this._enforceBufferSizeLimit(1)
@@ -293,12 +244,10 @@ export default class Parser {
         }
         this._underConstructionById[id] = feature
 
-        // see if we have anything buffered that refers to it
         this._resolveReferencesTo(feature, id)
       }
     })
 
-    // try to resolve all its references
     this._resolveReferencesFrom(
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       feature || [featureLine],
@@ -309,20 +258,13 @@ export default class Parser {
 
   private _resolveReferencesTo(feature: GFF3.GFF3Feature, id: string) {
     const references = this._underConstructionOrphans[id]
-    //   references is of the form
-    //   {
-    //     'Parent' : [ orphans that have a Parent attr referencing this feature ],
-    //     'Derives_from' : [ orphans that have a Derives_from attr referencing this feature ],
-    //    }
     if (!references) {
       return
     }
-    feature.forEach(loc => {
+    for (const loc of feature) {
       loc.child_features.push(...references.Parent)
-    })
-    feature.forEach(loc => {
       loc.derived_features.push(...references.Derives_from)
-    })
+    }
     delete this._underConstructionOrphans[id]
   }
 
@@ -336,72 +278,58 @@ export default class Parser {
     references: { Parent: string[]; Derives_from: string[] },
     ids: string[],
   ) {
-    // this is all a bit more awkward in javascript than it was in perl
-    function postSet(
-      obj: Record<string, Record<string, boolean | undefined> | undefined>,
-      slot1: string,
-      slot2: string,
-    ) {
-      let subObj = obj[slot1]
-      if (!subObj) {
-        subObj = {}
-        obj[slot1] = subObj
-      }
-      const returnVal = subObj[slot2] || false
-      subObj[slot2] = true
-      return returnVal
-    }
-
-    references.Parent.forEach(toId => {
+    for (const toId of references.Parent) {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
-        const pname = containerAttributes.Parent
-        if (
-          !ids.filter(id =>
-            postSet(this._completedReferences, id, `Parent,${toId}`),
-          ).length
-        ) {
-          otherFeature.forEach(location => {
-            location[pname].push(feature)
-          })
+        let dominated = false
+        for (const id of ids) {
+          const domKey = `Parent,${toId}`
+          const rec = this._completedReferences[id] || (this._completedReferences[id] = {})
+          if (rec[domKey]) {
+            dominated = true
+          }
+          rec[domKey] = true
+        }
+        if (!dominated) {
+          for (const location of otherFeature) {
+            location.child_features.push(feature)
+          }
         }
       } else {
         let ref = this._underConstructionOrphans[toId]
         if (!ref) {
-          ref = {
-            Parent: [],
-            Derives_from: [],
-          }
+          ref = { Parent: [], Derives_from: [] }
           this._underConstructionOrphans[toId] = ref
         }
         ref.Parent.push(feature)
       }
-    })
+    }
 
-    references.Derives_from.forEach(toId => {
+    for (const toId of references.Derives_from) {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
-        const pname = containerAttributes.Derives_from
-        if (
-          !ids.filter(id =>
-            postSet(this._completedReferences, id, `Derives_from,${toId}`),
-          ).length
-        ) {
-          otherFeature.forEach(location => {
-            location[pname].push(feature)
-          })
+        let dominated = false
+        for (const id of ids) {
+          const domKey = `Derives_from,${toId}`
+          const rec = this._completedReferences[id] || (this._completedReferences[id] = {})
+          if (rec[domKey]) {
+            dominated = true
+          }
+          rec[domKey] = true
+        }
+        if (!dominated) {
+          for (const location of otherFeature) {
+            location.derived_features.push(feature)
+          }
         }
       } else {
         let ref = this._underConstructionOrphans[toId]
         if (!ref) {
-          ref = {
-            Parent: [],
-            Derives_from: [],
-          }
+          ref = { Parent: [], Derives_from: [] }
           this._underConstructionOrphans[toId] = ref
         }
         ref.Derives_from.push(feature)
       }
-    })
+    }
   }
 }

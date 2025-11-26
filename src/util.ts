@@ -1,14 +1,28 @@
 // Fast, low-level functions for parsing and formatting GFF3.
 // JavaScript port of Robert Buels's Bio::GFF3::LowLevel Perl module.
 
+const escapeRegex = /%([0-9A-Fa-f]{2})/g
+const directiveRegex = /^\s*##\s*(\S+)\s*(.*)/
+const lineEndRegex = /\r?\n$/
+const whitespaceRegex = /\s+/
+const nonDigitRegex = /\D/g
+// eslint-disable-next-line no-control-regex
+const attrEscapeRegex = /[\n;\r\t=%&,\u0000-\u001f\u007f-\u00ff]/g
+// eslint-disable-next-line no-control-regex
+const columnEscapeRegex = /[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g
+
 /**
  * Unescape a string value used in a GFF3 attribute.
  *
  * @param stringVal - Escaped GFF3 string value
  * @returns An unescaped string value
  */
+
 export function unescape(stringVal: string): string {
-  return stringVal.replaceAll(/%([0-9A-Fa-f]{2})/g, (_match, seq) =>
+  if (!stringVal.includes('%')) {
+    return stringVal
+  }
+  return stringVal.replaceAll(escapeRegex, (_match, seq) =>
     String.fromCharCode(parseInt(seq, 16)),
   )
 }
@@ -27,8 +41,7 @@ function _escape(regex: RegExp, s: string | number) {
  * @returns An escaped string value
  */
 export function escape(rawVal: string | number): string {
-  // eslint-disable-next-line no-control-regex
-  return _escape(/[\n;\r\t=%&,\u0000-\u001f\u007f-\u00ff]/g, rawVal)
+  return _escape(attrEscapeRegex, rawVal)
 }
 
 /**
@@ -38,8 +51,7 @@ export function escape(rawVal: string | number): string {
  * @returns An escaped column value
  */
 export function escapeColumn(rawVal: string | number): string {
-  // eslint-disable-next-line no-control-regex
-  return _escape(/[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g, rawVal)
+  return _escape(columnEscapeRegex, rawVal)
 }
 
 /**
@@ -55,29 +67,32 @@ export function parseAttributes(attrString: string): GFF3Attributes {
 
   const attrs: GFF3Attributes = {}
 
-  attrString
-    .replace(/\r?\n$/, '')
-    .split(';')
-    .forEach(a => {
-      const nv = a.split('=', 2)
-      if (!nv[1]?.length) {
-        return
-      }
+  let str = attrString
+  if (str.endsWith('\n')) {
+    str = str.slice(0, str.endsWith('\r\n') ? -2 : -1)
+  }
 
-      nv[0] = nv[0].trim()
-      let arec = attrs[nv[0].trim()]
-      if (!arec) {
-        arec = []
-        attrs[nv[0]] = arec
-      }
+  for (const a of str.split(';')) {
+    const eqIdx = a.indexOf('=')
+    if (eqIdx === -1) {
+      continue
+    }
+    const value = a.slice(eqIdx + 1)
+    if (!value.length) {
+      continue
+    }
 
-      arec.push(
-        ...nv[1]
-          .split(',')
-          .map(s => s.trim())
-          .map(unescape),
-      )
-    })
+    const tag = a.slice(0, eqIdx).trim()
+    let arec = attrs[tag]
+    if (!arec) {
+      arec = []
+      attrs[tag] = arec
+    }
+
+    for (const s of value.split(',')) {
+      arec.push(unescape(s.trim()))
+    }
+  }
   return attrs
 }
 
@@ -88,22 +103,41 @@ export function parseAttributes(attrString: string): GFF3Attributes {
  * @returns The parsed feature
  */
 export function parseFeature(line: string): GFF3FeatureLine {
-  // split the line into columns and replace '.' with null in each column
-  const f = line.split('\t').map(a => (a === '.' || a === '' ? null : a))
+  return parseFieldsArray(line.split('\t'))
+}
 
-  // unescape only the ref, source, and type columns
-  const parsed: GFF3FeatureLine = {
-    seq_id: f[0] && unescape(f[0]),
-    source: f[1] && unescape(f[1]),
-    type: f[2] && unescape(f[2]),
-    start: f[3] === null ? null : parseInt(f[3], 10),
-    end: f[4] === null ? null : parseInt(f[4], 10),
-    score: f[5] === null ? null : parseFloat(f[5]),
-    strand: f[6],
-    phase: f[7],
-    attributes: f[8] === null ? null : parseAttributes(f[8]),
+/**
+ * Parse a GFF3 feature from a pre-split fields array
+ *
+ * @param f - Array of 9 GFF3 column values (use null or '.' for empty values)
+ * @returns The parsed feature
+ */
+function norm(a: string | null | undefined) {
+  return a === '.' || a === '' || a === undefined ? null : a
+}
+
+export function parseFieldsArray(f: (string | null | undefined)[]): GFF3FeatureLine {
+  const seq_id = norm(f[0])
+  const source = norm(f[1])
+  const type = norm(f[2])
+  const start = norm(f[3])
+  const end = norm(f[4])
+  const score = norm(f[5])
+  const strand = norm(f[6])
+  const phase = norm(f[7])
+  const attrString = norm(f[8])
+
+  return {
+    seq_id: seq_id ? unescape(seq_id) : null,
+    source: source ? unescape(source) : null,
+    type: type ? unescape(type) : null,
+    start: start === null ? null : parseInt(start, 10),
+    end: end === null ? null : parseInt(end, 10),
+    score: score === null ? null : parseFloat(score),
+    strand,
+    phase,
+    attributes: attrString === null ? null : parseAttributes(attrString),
   }
-  return parsed
 }
 
 /**
@@ -119,7 +153,7 @@ export function parseDirective(
   | GFF3SequenceRegionDirective
   | GFF3GenomeBuildDirective
   | null {
-  const match = /^\s*##\s*(\S+)\s*(.*)/.exec(line)
+  const match = directiveRegex.exec(line)
   if (!match) {
     return null
   }
@@ -128,22 +162,22 @@ export function parseDirective(
   let [, , contents] = match
 
   const parsed: GFF3Directive = { directive: name }
-  if (contents.length) {
-    contents = contents.replace(/\r?\n$/, '')
+  if (contents!.length) {
+    contents = contents!.replace(lineEndRegex, '')
     parsed.value = contents
   }
 
   // do a little additional parsing for sequence-region and genome-build directives
   if (name === 'sequence-region') {
-    const c = contents.split(/\s+/, 3)
+    const c = contents!.split(whitespaceRegex, 3)
     return {
       ...parsed,
       seq_id: c[0],
-      start: c[1]?.replaceAll(/\D/g, ''),
-      end: c[2]?.replaceAll(/\D/g, ''),
+      start: c[1]?.replaceAll(nonDigitRegex, ''),
+      end: c[2]?.replaceAll(nonDigitRegex, ''),
     } as GFF3SequenceRegionDirective
   } else if (name === 'genome-build') {
-    const [source, buildName] = contents.split(/\s+/, 2)
+    const [source, buildName] = contents!.split(whitespaceRegex, 2)
     return {
       ...parsed,
       source,
@@ -162,23 +196,12 @@ export function parseDirective(
  */
 export function formatAttributes(attrs: GFF3Attributes): string {
   const attrOrder: string[] = []
-  Object.entries(attrs).forEach(([tag, val]) => {
+  for (const [tag, val] of Object.entries(attrs)) {
     if (!val) {
-      return
+      continue
     }
-    let valstring
-    // eslint-disable-next-line no-prototype-builtins
-    if (val.hasOwnProperty('toString')) {
-      valstring = escape(val.toString())
-      // } else if (Array.isArray(val.values)) {
-      //   valstring = val.values.map(escape).join(',')
-    } else if (Array.isArray(val)) {
-      valstring = val.map(escape).join(',')
-    } else {
-      valstring = escape(val)
-    }
-    attrOrder.push(`${escape(tag)}=${valstring}`)
-  })
+    attrOrder.push(`${escape(tag)}=${val.map(escape).join(',')}`)
+  }
   return attrOrder.length ? attrOrder.join(';') : '.'
 }
 

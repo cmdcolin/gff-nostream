@@ -1,5 +1,5 @@
-import { parseArraySync, parseStringSync } from './api'
-export { parseArraySync, parseStringSync }
+import { parseArraySync, parseRecordsSync, parseStringSync } from './api.ts'
+export { parseArraySync, parseRecordsSync, parseStringSync }
 
 export type {
   GFF3Comment,
@@ -9,4 +9,5 @@ export type {
   GFF3FeatureLineWithRefs,
   GFF3Item,
   GFF3Sequence,
-} from './api'
+  LineRecord,
+} from './api.ts'
