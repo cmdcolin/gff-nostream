@@ -1,5 +1,7 @@
-import Parser from './parse'
-import { GFF3Feature, GFF3FeatureLine, parseFieldsArray } from './util'
+import Parser from './parse.ts'
+import { parseFieldsArray } from './util.ts'
+
+import type { GFF3Feature, GFF3FeatureLine } from './util.ts'
 
 export interface LineRecord {
   fields: string[]
@@ -90,12 +92,12 @@ export function parseRecordsSync(records: LineRecord[]): GFF3Feature[] {
   return items
 }
 
-export {
-  type GFF3Comment,
-  type GFF3Directive,
-  type GFF3Feature,
-  type GFF3FeatureLine,
-  type GFF3FeatureLineWithRefs,
-  type GFF3Item,
-  type GFF3Sequence,
-} from './util'
+export type {
+  GFF3Comment,
+  GFF3Directive,
+  GFF3Feature,
+  GFF3FeatureLine,
+  GFF3FeatureLineWithRefs,
+  GFF3Item,
+  GFF3Sequence,
+} from './util.ts'

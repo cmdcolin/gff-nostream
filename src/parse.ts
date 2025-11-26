@@ -1,44 +1,16 @@
-import * as GFF3 from './util'
+import * as GFF3 from './util.ts'
 
 const containerAttributes = {
   Parent: 'child_features' as const,
   Derives_from: 'derived_features' as const,
 }
 
-export class FASTAParser {
-  seqCallback: (sequence: GFF3.GFF3Sequence) => void
-  currentSequence:
-    | { id: string; sequence: string; description?: string }
-    | undefined
-
-  constructor(seqCallback: (sequence: GFF3.GFF3Sequence) => void) {
-    this.seqCallback = seqCallback
-    this.currentSequence = undefined
-  }
-
-  addLine(line: string): void {
-    const defMatch = /^>\s*(\S+)\s*(.*)/.exec(line)
-    if (defMatch) {
-      this._flush()
-      this.currentSequence = { id: defMatch[1], sequence: '' }
-      if (defMatch[2]) {
-        this.currentSequence.description = defMatch[2].trim()
-      }
-    } else if (this.currentSequence && /\S/.test(line)) {
-      this.currentSequence.sequence += line.replaceAll(/\s/g, '')
-    }
-  }
-
-  private _flush() {
-    if (this.currentSequence) {
-      this.seqCallback(this.currentSequence)
-    }
-  }
-
-  finish(): void {
-    this._flush()
-  }
-}
+const featureLineRegex = /^\s*[^#\s>]/
+const commentOrDirectiveRegex = /^\s*(#+)(.*)/
+const blankLineRegex = /^\s*$/
+const fastaStartRegex = /^\s*>/
+const leadingWhitespaceRegex = /\s*/
+const lineEndingRegex = /\r?\n?$/g
 
 interface ParserArgs {
   featureCallback?(feature: GFF3.GFF3Feature): void
@@ -46,7 +18,6 @@ interface ParserArgs {
   commentCallback?(comment: GFF3.GFF3Comment): void
   errorCallback?(error: string): void
   directiveCallback?(directive: GFF3.GFF3Directive): void
-  sequenceCallback?(sequence: GFF3.GFF3Sequence): void
   bufferSize?: number
   disableDerivesFromReferences?: boolean
 }
@@ -63,12 +34,7 @@ export default class Parser {
   errorCallback: (error: string) => void
   disableDerivesFromReferences: boolean
   directiveCallback: (directive: GFF3.GFF3Directive) => void
-  sequenceCallback: (sequence: GFF3.GFF3Sequence) => void
   bufferSize: number
-  fastaParser: FASTAParser | undefined = undefined
-  // if this is true, the parser ignores the
-  // rest of the lines in the file.  currently
-  // set when the file switches over to FASTA
   eof = false
   lineNumber = 0
   // features that we have to keep on hand for now because they
@@ -99,7 +65,6 @@ export default class Parser {
     this.commentCallback = args.commentCallback || nullFunc
     this.errorCallback = args.errorCallback || nullFunc
     this.directiveCallback = args.directiveCallback || nullFunc
-    this.sequenceCallback = args.sequenceCallback || nullFunc
     this.disableDerivesFromReferences =
       args.disableDerivesFromReferences || false
 
@@ -120,22 +85,22 @@ export default class Parser {
 
     this.lineNumber += 1
 
-    if (/^\s*[^#\s>]/.test(line)) {
+    if (featureLineRegex.test(line)) {
       // feature line, most common case
       this._bufferLine(line)
       return
     }
 
-    const match = /^\s*(#+)(.*)/.exec(line)
+    const match = commentOrDirectiveRegex.exec(line)
     if (match) {
       // directive or comment
       const [, hashsigns] = match
       let [, , contents] = match
 
-      if (hashsigns.length === 3) {
+      if (hashsigns!.length === 3) {
         // sync directive, all forward-references are resolved.
         this._emitAllUnderConstructionFeatures()
-      } else if (hashsigns.length === 2) {
+      } else if (hashsigns!.length === 2) {
         const directive = GFF3.parseDirective(line)
         if (directive) {
           if (directive.directive === 'FASTA') {
@@ -147,12 +112,12 @@ export default class Parser {
           }
         }
       } else {
-        contents = contents.replace(/\s*/, '')
+        contents = contents!.replace(leadingWhitespaceRegex, '')
         this._emitItem({ comment: contents })
       }
-    } else if (/^\s*$/.test(line)) {
+    } else if (blankLineRegex.test(line)) {
       // blank line, do nothing
-    } else if (/^\s*>/.test(line)) {
+    } else if (fastaStartRegex.test(line)) {
       // implicit beginning of a FASTA section
       this._emitAllUnderConstructionFeatures()
       this.eof = true
@@ -160,7 +125,7 @@ export default class Parser {
       this.fastaParser.addLine(line)
     } else {
       // it's a parse error
-      const errLine = line.replaceAll(/\r?\n?$/g, '')
+      const errLine = line.replaceAll(lineEndingRegex, '')
       throw new Error(`GFF3 parse error.  Cannot parse '${errLine}'.`)
     }
   }
@@ -257,11 +222,9 @@ export default class Parser {
   }
 
   private _bufferParsedLine(rawFeatureLine: GFF3.GFF3FeatureLine) {
-    const featureLine: GFF3.GFF3FeatureLineWithRefs = {
-      ...rawFeatureLine,
-      child_features: [],
-      derived_features: [],
-    }
+    const featureLine = rawFeatureLine as GFF3.GFF3FeatureLineWithRefs
+    featureLine.child_features = []
+    featureLine.derived_features = []
 
     const ids = featureLine.attributes?.ID || []
     const parents = featureLine.attributes?.Parent || []

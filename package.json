@@ -4,8 +4,16 @@
   "description": "utilities to read GFF3 data",
   "license": "MIT",
   "repository": "cmdcolin/gff-nostream",
-  "main": "dist/index.js",
-  "module": "esm/index.js",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "import": "./esm/index.js"
+    },
+    "require": {
+      "require": "./dist/index.js"
+    }
+  },
   "author": {
     "name": "Colin Diesh",
     "email": "colin.diesh@gmail.com",
@@ -18,13 +26,15 @@
   ],
   "scripts": {
     "test": "vitest",
+    "benchonly": "vitest bench",
+    "bench": "./scripts/build-both-branches.sh \"$BRANCH1\" \"$BRANCH2\" && vitest bench",
     "clean": "rimraf dist esm",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "docs": "documentation readme src/api.ts --section=API  --shallow && yarn format",
     "format": "prettier --write .",
     "prebuild": "yarn clean",
-    "build:esm": "tsc --target es2018 --outDir esm",
-    "build:es5": "tsc --target es2015 --module commonjs --outDir dist",
+    "build:esm": "tsc --target esnext --outDir esm",
+    "build:es5": "tsc --target es2020 --module commonjs --outDir dist",
     "postbuild:es5": "echo '{\"type\": \"commonjs\"}' > dist/package.json",
     "build": "yarn build:es5 && yarn build:esm",
     "prepublishOnly": "yarn test --run && yarn build",

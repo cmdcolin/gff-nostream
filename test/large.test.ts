@@ -3,7 +3,7 @@ import { gunzipSync } from 'zlib'
 
 import { expect, test } from 'vitest'
 
-import { parseStringSync } from '../src'
+import { parseStringSync } from '../src/index.ts'
 
 test('large weird file', () => {
   const data = JSON.parse(

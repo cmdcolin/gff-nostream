@@ -1,4 +1,4 @@
-import { parseArraySync, parseRecordsSync, parseStringSync } from './api'
+import { parseArraySync, parseRecordsSync, parseStringSync } from './api.ts'
 export { parseArraySync, parseRecordsSync, parseStringSync }
 
 export type {
@@ -10,4 +10,4 @@ export type {
   GFF3Item,
   GFF3Sequence,
   LineRecord,
-} from './api'
+} from './api.ts'

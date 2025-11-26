@@ -1,13 +1,20 @@
 {
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "compilerOptions": {
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "declaration": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   }
 }

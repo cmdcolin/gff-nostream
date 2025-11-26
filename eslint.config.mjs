@@ -5,7 +5,15 @@ import tseslint from 'typescript-eslint'
 
 export default defineConfig(
   {
-    ignores: ['esm/**/*', 'dist/**/*', '*.js', '*.mjs', 'example/*'],
+    ignores: [
+      'esm/**/*',
+      'dist/**/*',
+      '*.js',
+      '*.mjs',
+      'example/*',
+      'prof.ts',
+      'benchmarks/*',
+    ],
   },
   {
     languageOptions: {
@@ -48,6 +56,7 @@ export default defineConfig(
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-dynamic-delete': 'off',
       'import/no-unresolved': 'off',
+      'import/extensions': ['error', 'ignorePackages'],
       'import/order': [
         'error',
         {
