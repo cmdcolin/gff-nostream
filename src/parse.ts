@@ -9,7 +9,6 @@ const featureLineRegex = /^\s*[^#\s>]/
 const commentOrDirectiveRegex = /^\s*(#+)(.*)/
 const blankLineRegex = /^\s*$/
 const fastaStartRegex = /^\s*>/
-const leadingWhitespaceRegex = /\s*/
 const lineEndingRegex = /\r?\n?$/g
 
 interface ParserArgs {
@@ -105,8 +104,7 @@ export default class Parser {
           }
         }
       } else {
-        contents = contents!.replace(leadingWhitespaceRegex, '')
-        this._emitItem({ comment: contents })
+        this._emitItem({ comment: contents!.trimStart() })
       }
     } else if (blankLineRegex.test(line)) {
       // blank line, do nothing
@@ -196,11 +194,10 @@ export default class Parser {
 
     // if we have any orphans hanging around still, this is a
     // problem. die with a parse error
-    if (Array.from(Object.values(this._underConstructionOrphans)).length) {
+    const orphanKeys = Object.keys(this._underConstructionOrphans)
+    if (orphanKeys.length) {
       throw new Error(
-        `some features reference other features that do not exist in the file (or in the same '###' scope). ${Object.keys(
-          this._underConstructionOrphans,
-        ).join(',')}`,
+        `some features reference other features that do not exist in the file (or in the same '###' scope). ${orphanKeys.join(',')}`,
       )
     }
   }
@@ -261,20 +258,13 @@ export default class Parser {
 
   private _resolveReferencesTo(feature: GFF3.GFF3Feature, id: string) {
     const references = this._underConstructionOrphans[id]
-    //   references is of the form
-    //   {
-    //     'Parent' : [ orphans that have a Parent attr referencing this feature ],
-    //     'Derives_from' : [ orphans that have a Derives_from attr referencing this feature ],
-    //    }
     if (!references) {
       return
     }
-    feature.forEach(loc => {
+    for (const loc of feature) {
       loc.child_features.push(...references.Parent)
-    })
-    feature.forEach(loc => {
       loc.derived_features.push(...references.Derives_from)
-    })
+    }
     delete this._underConstructionOrphans[id]
   }
 
