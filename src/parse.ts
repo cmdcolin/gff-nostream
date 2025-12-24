@@ -277,8 +277,8 @@ export default class Parser {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
         let dominated = false
+        const domKey = `P\x00${toId}`
         for (const id of ids) {
-          const domKey = `Parent,${toId}`
           const rec =
             this._completedReferences[id] ||
             (this._completedReferences[id] = {})
@@ -306,8 +306,8 @@ export default class Parser {
       const otherFeature = this._underConstructionById[toId]
       if (otherFeature) {
         let dominated = false
+        const domKey = `D\x00${toId}`
         for (const id of ids) {
-          const domKey = `Derives_from,${toId}`
           const rec =
             this._completedReferences[id] ||
             (this._completedReferences[id] = {})
