@@ -89,7 +89,7 @@ export function escapeColumn(rawVal: string | number): string {
  * @returns Parsed attributes
  */
 export function parseAttributes(attrString: string): GFF3Attributes {
-  if (!attrString.length || attrString === '.') {
+  if (attrString.length === 0 || attrString === '.') {
     return {}
   }
 
@@ -98,61 +98,41 @@ export function parseAttributes(attrString: string): GFF3Attributes {
 
   if (attrString[len - 1] === '\n') {
     len = attrString[len - 2] === '\r' ? len - 2 : len - 1
+    attrString = attrString.slice(0, len)
   }
 
   let start = 0
-  for (let i = 0; i <= len; i++) {
-    if (i === len || attrString[i] === ';') {
-      if (i > start) {
-        let eqIdx = -1
-        for (let j = start; j < i; j++) {
-          if (attrString[j] === '=') {
-            eqIdx = j
-            break
-          }
+  while (start < len) {
+    let semiIdx = attrString.indexOf(';', start)
+    if (semiIdx === -1) {
+      semiIdx = len
+    }
+
+    if (semiIdx > start) {
+      const eqIdx = attrString.indexOf('=', start)
+      if (eqIdx !== -1 && eqIdx < semiIdx && eqIdx + 1 < semiIdx) {
+        const tag = attrString.slice(start, eqIdx)
+        let arec = attrs[tag]
+        if (!arec) {
+          arec = []
+          attrs[tag] = arec
         }
 
-        if (eqIdx !== -1 && eqIdx + 1 < i) {
-          let keyStart = start
-          let keyEnd = eqIdx
-
-          while (keyStart < keyEnd && attrString[keyStart] === ' ') {
-            keyStart++
+        let valStart = eqIdx + 1
+        while (valStart < semiIdx) {
+          let commaIdx = attrString.indexOf(',', valStart)
+          if (commaIdx === -1 || commaIdx > semiIdx) {
+            commaIdx = semiIdx
           }
-          while (keyEnd > keyStart && attrString[keyEnd - 1] === ' ') {
-            keyEnd--
+          if (commaIdx > valStart) {
+            const val = attrString.slice(valStart, commaIdx)
+            arec.push(val.indexOf('%') === -1 ? val : unescape(val))
           }
-
-          const tag = attrString.slice(keyStart, keyEnd)
-          let arec = attrs[tag]
-          if (!arec) {
-            arec = []
-            attrs[tag] = arec
-          }
-
-          let valStart = eqIdx + 1
-          for (let j = valStart; j <= i; j++) {
-            if (j === i || attrString[j] === ',') {
-              if (j > valStart) {
-                let vs = valStart
-                let ve = j
-
-                while (vs < ve && attrString[vs] === ' ') {
-                  vs++
-                }
-                while (ve > vs && attrString[ve - 1] === ' ') {
-                  ve--
-                }
-
-                arec.push(unescape(attrString.slice(vs, ve)))
-              }
-              valStart = j + 1
-            }
-          }
+          valStart = commaIdx + 1
         }
       }
-      start = i + 1
     }
+    start = semiIdx + 1
   }
   return attrs
 }
@@ -165,7 +145,7 @@ export function parseAttributes(attrString: string): GFF3Attributes {
  * @returns Parsed attributes
  */
 export function parseAttributesNoUnescape(attrString: string): GFF3Attributes {
-  if (!attrString.length || attrString === '.') {
+  if (attrString.length === 0 || attrString === '.') {
     return {}
   }
 
@@ -174,63 +154,53 @@ export function parseAttributesNoUnescape(attrString: string): GFF3Attributes {
 
   if (attrString[len - 1] === '\n') {
     len = attrString[len - 2] === '\r' ? len - 2 : len - 1
+    attrString = attrString.slice(0, len)
   }
 
   let start = 0
-  for (let i = 0; i <= len; i++) {
-    if (i === len || attrString[i] === ';') {
-      if (i > start) {
-        let eqIdx = -1
-        for (let j = start; j < i; j++) {
-          if (attrString[j] === '=') {
-            eqIdx = j
-            break
-          }
+  while (start < len) {
+    let semiIdx = attrString.indexOf(';', start)
+    if (semiIdx === -1) {
+      semiIdx = len
+    }
+
+    if (semiIdx > start) {
+      const eqIdx = attrString.indexOf('=', start)
+      if (eqIdx !== -1 && eqIdx < semiIdx && eqIdx + 1 < semiIdx) {
+        const tag = attrString.slice(start, eqIdx)
+        let arec = attrs[tag]
+        if (!arec) {
+          arec = []
+          attrs[tag] = arec
         }
 
-        if (eqIdx !== -1 && eqIdx + 1 < i) {
-          let keyStart = start
-          let keyEnd = eqIdx
-
-          while (keyStart < keyEnd && attrString[keyStart] === ' ') {
-            keyStart++
+        let valStart = eqIdx + 1
+        while (valStart < semiIdx) {
+          let commaIdx = attrString.indexOf(',', valStart)
+          if (commaIdx === -1 || commaIdx > semiIdx) {
+            commaIdx = semiIdx
           }
-          while (keyEnd > keyStart && attrString[keyEnd - 1] === ' ') {
-            keyEnd--
+          if (commaIdx > valStart) {
+            arec.push(attrString.slice(valStart, commaIdx))
           }
-
-          const tag = attrString.slice(keyStart, keyEnd)
-          let arec = attrs[tag]
-          if (!arec) {
-            arec = []
-            attrs[tag] = arec
-          }
-
-          let valStart = eqIdx + 1
-          for (let j = valStart; j <= i; j++) {
-            if (j === i || attrString[j] === ',') {
-              if (j > valStart) {
-                let vs = valStart
-                let ve = j
-
-                while (vs < ve && attrString[vs] === ' ') {
-                  vs++
-                }
-                while (ve > vs && attrString[ve - 1] === ' ') {
-                  ve--
-                }
-
-                arec.push(attrString.slice(vs, ve))
-              }
-              valStart = j + 1
-            }
-          }
+          valStart = commaIdx + 1
         }
       }
-      start = i + 1
     }
+    start = semiIdx + 1
   }
   return attrs
+}
+
+function normUnescape(s: string) {
+  if (s.length === 0 || s === '.') {
+    return null
+  }
+  return s.indexOf('%') === -1 ? s : unescape(s)
+}
+
+function norm(s: string) {
+  return s.length === 0 || s === '.' ? null : s
 }
 
 /**
@@ -240,7 +210,36 @@ export function parseAttributesNoUnescape(attrString: string): GFF3Attributes {
  * @returns The parsed feature
  */
 export function parseFeature(line: string): GFF3FeatureLine {
-  return parseFieldsArray(line.split('\t'))
+  const t0 = line.indexOf('\t')
+  const t1 = line.indexOf('\t', t0 + 1)
+  const t2 = line.indexOf('\t', t1 + 1)
+  const t3 = line.indexOf('\t', t2 + 1)
+  const t4 = line.indexOf('\t', t3 + 1)
+  const t5 = line.indexOf('\t', t4 + 1)
+  const t6 = line.indexOf('\t', t5 + 1)
+  const t7 = line.indexOf('\t', t6 + 1)
+
+  const seq_id = line.slice(0, t0)
+  const source = line.slice(t0 + 1, t1)
+  const type = line.slice(t1 + 1, t2)
+  const startStr = line.slice(t2 + 1, t3)
+  const endStr = line.slice(t3 + 1, t4)
+  const scoreStr = line.slice(t4 + 1, t5)
+  const strand = line.slice(t5 + 1, t6)
+  const phase = line.slice(t6 + 1, t7)
+  const attrString = line.slice(t7 + 1)
+
+  return {
+    seq_id: normUnescape(seq_id),
+    source: normUnescape(source),
+    type: normUnescape(type),
+    start: startStr.length === 0 || startStr === '.' ? null : parseInt(startStr, 10),
+    end: endStr.length === 0 || endStr === '.' ? null : parseInt(endStr, 10),
+    score: scoreStr.length === 0 || scoreStr === '.' ? null : parseFloat(scoreStr),
+    strand: norm(strand),
+    phase: norm(phase),
+    attributes: attrString.length === 0 || attrString === '.' ? null : parseAttributes(attrString),
+  }
 }
 
 /**
@@ -249,33 +248,29 @@ export function parseFeature(line: string): GFF3FeatureLine {
  * @param f - Array of 9 GFF3 column values (use null or '.' for empty values)
  * @returns The parsed feature
  */
-function norm(a: string | null | undefined) {
-  return a === '.' || a === '' || a === undefined ? null : a
-}
-
 export function parseFieldsArray(
   f: (string | null | undefined)[],
 ): GFF3FeatureLine {
-  const seq_id = norm(f[0])
-  const source = norm(f[1])
-  const type = norm(f[2])
-  const start = norm(f[3])
-  const end = norm(f[4])
-  const score = norm(f[5])
-  const strand = norm(f[6])
-  const phase = norm(f[7])
-  const attrString = norm(f[8])
+  const seq_id = f[0]
+  const source = f[1]
+  const type = f[2]
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
 
   return {
-    seq_id: seq_id ? unescape(seq_id) : null,
-    source: source ? unescape(source) : null,
-    type: type ? unescape(type) : null,
-    start: start === null ? null : parseInt(start, 10),
-    end: end === null ? null : parseInt(end, 10),
-    score: score === null ? null : parseFloat(score),
-    strand,
-    phase,
-    attributes: attrString === null ? null : parseAttributes(attrString),
+    seq_id: seq_id ? normUnescape(seq_id) : null,
+    source: source ? normUnescape(source) : null,
+    type: type ? normUnescape(type) : null,
+    start: !startStr || startStr === '.' ? null : parseInt(startStr, 10),
+    end: !endStr || endStr === '.' ? null : parseInt(endStr, 10),
+    score: !scoreStr || scoreStr === '.' ? null : parseFloat(scoreStr),
+    strand: strand && strand !== '.' ? strand : null,
+    phase: phase && phase !== '.' ? phase : null,
+    attributes: !attrString || attrString === '.' ? null : parseAttributes(attrString),
   }
 }
 
@@ -289,27 +284,26 @@ export function parseFieldsArray(
 export function parseFieldsArrayNoUnescape(
   f: (string | null | undefined)[],
 ): GFF3FeatureLine {
-  const seq_id = norm(f[0])
-  const source = norm(f[1])
-  const type = norm(f[2])
-  const start = norm(f[3])
-  const end = norm(f[4])
-  const score = norm(f[5])
-  const strand = norm(f[6])
-  const phase = norm(f[7])
-  const attrString = norm(f[8])
+  const seq_id = f[0]
+  const source = f[1]
+  const type = f[2]
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
 
   return {
-    seq_id,
-    source,
-    type,
-    start: start === null ? null : parseInt(start, 10),
-    end: end === null ? null : parseInt(end, 10),
-    score: score === null ? null : parseFloat(score),
-    strand,
-    phase,
-    attributes:
-      attrString === null ? null : parseAttributesNoUnescape(attrString),
+    seq_id: seq_id && seq_id !== '.' ? seq_id : null,
+    source: source && source !== '.' ? source : null,
+    type: type && type !== '.' ? type : null,
+    start: !startStr || startStr === '.' ? null : parseInt(startStr, 10),
+    end: !endStr || endStr === '.' ? null : parseInt(endStr, 10),
+    score: !scoreStr || scoreStr === '.' ? null : parseFloat(scoreStr),
+    strand: strand && strand !== '.' ? strand : null,
+    phase: phase && phase !== '.' ? phase : null,
+    attributes: !attrString || attrString === '.' ? null : parseAttributesNoUnescape(attrString),
   }
 }
 
