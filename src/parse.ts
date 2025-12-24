@@ -1,10 +1,5 @@
 import * as GFF3 from './util.ts'
 
-const containerAttributes = {
-  Parent: 'child_features' as const,
-  Derives_from: 'derived_features' as const,
-}
-
 const featureLineRegex = /^\s*[^#\s>]/
 const commentOrDirectiveRegex = /^\s*(#+)(.*)/
 const blankLineRegex = /^\s*$/
@@ -284,7 +279,9 @@ export default class Parser {
         let dominated = false
         for (const id of ids) {
           const domKey = `Parent,${toId}`
-          const rec = this._completedReferences[id] || (this._completedReferences[id] = {})
+          const rec =
+            this._completedReferences[id] ||
+            (this._completedReferences[id] = {})
           if (rec[domKey]) {
             dominated = true
           }
@@ -311,7 +308,9 @@ export default class Parser {
         let dominated = false
         for (const id of ids) {
           const domKey = `Derives_from,${toId}`
-          const rec = this._completedReferences[id] || (this._completedReferences[id] = {})
+          const rec =
+            this._completedReferences[id] ||
+            (this._completedReferences[id] = {})
           if (rec[domKey]) {
             dominated = true
           }

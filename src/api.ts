@@ -1,5 +1,5 @@
 import Parser from './parse.ts'
-import { parseFieldsArray } from './util.ts'
+import { parseFieldsArray, parseFieldsArrayNoUnescape } from './util.ts'
 
 import type { GFF3Feature, GFF3FeatureLine } from './util.ts'
 
@@ -79,6 +79,42 @@ export function parseRecordsSync(records: LineRecord[]): GFF3Feature[] {
 
   for (const record of records) {
     const featureLine: GFF3FeatureLine = parseFieldsArray(record.fields)
+    if (record.lineHash !== undefined) {
+      if (!featureLine.attributes) {
+        featureLine.attributes = {}
+      }
+      featureLine.attributes._lineHash = [String(record.lineHash)]
+    }
+    parser.addParsedFeatureLine(featureLine)
+  }
+  parser.finish()
+
+  return items
+}
+
+/**
+ * Synchronously parse an array of LineRecord objects containing pre-split GFF3
+ * fields and return an array of the parsed items. Uses a fast path that skips
+ * unescaping when hasEscapes is false.
+ *
+ * @param records - Array of LineRecord objects with fields array and optional lineHash
+ * @param hasEscapes - Whether the records contain percent-encoded characters
+ * @returns array of parsed features
+ */
+export function parseRecordsSyncFast(records: LineRecord[], hasEscapes: boolean): GFF3Feature[] {
+  const items: GFF3Feature[] = []
+  const parser = new Parser({
+    featureCallback: arg => items.push(arg),
+    disableDerivesFromReferences: true,
+    errorCallback: err => {
+      throw new Error(err)
+    },
+  })
+
+  const parseFunc = hasEscapes ? parseFieldsArray : parseFieldsArrayNoUnescape
+
+  for (const record of records) {
+    const featureLine: GFF3FeatureLine = parseFunc(record.fields)
     if (record.lineHash !== undefined) {
       if (!featureLine.attributes) {
         featureLine.attributes = {}

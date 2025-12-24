@@ -97,6 +97,49 @@ export function parseAttributes(attrString: string): GFF3Attributes {
 }
 
 /**
+ * Parse the 9th column (attributes) of a GFF3 feature line without unescaping.
+ * Fast path for data known to contain no escaped characters.
+ *
+ * @param attrString - String of GFF3 9th column
+ * @returns Parsed attributes
+ */
+export function parseAttributesNoUnescape(attrString: string): GFF3Attributes {
+  if (!attrString.length || attrString === '.') {
+    return {}
+  }
+
+  const attrs: GFF3Attributes = {}
+
+  let str = attrString
+  if (str.endsWith('\n')) {
+    str = str.slice(0, str.endsWith('\r\n') ? -2 : -1)
+  }
+
+  for (const a of str.split(';')) {
+    const eqIdx = a.indexOf('=')
+    if (eqIdx === -1) {
+      continue
+    }
+    const value = a.slice(eqIdx + 1)
+    if (!value.length) {
+      continue
+    }
+
+    const tag = a.slice(0, eqIdx).trim()
+    let arec = attrs[tag]
+    if (!arec) {
+      arec = []
+      attrs[tag] = arec
+    }
+
+    for (const s of value.split(',')) {
+      arec.push(s.trim())
+    }
+  }
+  return attrs
+}
+
+/**
  * Parse a GFF3 feature line
  *
  * @param line - GFF3 feature line
@@ -137,6 +180,37 @@ export function parseFieldsArray(f: (string | null | undefined)[]): GFF3FeatureL
     strand,
     phase,
     attributes: attrString === null ? null : parseAttributes(attrString),
+  }
+}
+
+/**
+ * Parse a GFF3 feature from a pre-split fields array without unescaping.
+ * Fast path for data known to contain no escaped characters.
+ *
+ * @param f - Array of 9 GFF3 column values (use null or '.' for empty values)
+ * @returns The parsed feature
+ */
+export function parseFieldsArrayNoUnescape(f: (string | null | undefined)[]): GFF3FeatureLine {
+  const seq_id = norm(f[0])
+  const source = norm(f[1])
+  const type = norm(f[2])
+  const start = norm(f[3])
+  const end = norm(f[4])
+  const score = norm(f[5])
+  const strand = norm(f[6])
+  const phase = norm(f[7])
+  const attrString = norm(f[8])
+
+  return {
+    seq_id,
+    source,
+    type,
+    start: start === null ? null : parseInt(start, 10),
+    end: end === null ? null : parseInt(end, 10),
+    score: score === null ? null : parseFloat(score),
+    strand,
+    phase,
+    attributes: attrString === null ? null : parseAttributesNoUnescape(attrString),
   }
 }
 
