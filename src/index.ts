@@ -1,4 +1,9 @@
-export { parseRecords, parseStringSync } from './api.ts'
+export {
+  parseRecords,
+  parseRecordsJBrowse,
+  parseStringSync,
+  parseStringSyncJBrowse,
+} from './api.ts'
 
 export type {
   GFF3Comment,
@@ -8,5 +13,6 @@ export type {
   GFF3FeatureLineWithRefs,
   GFF3Item,
   GFF3Sequence,
+  JBrowseFeature,
   LineRecord,
 } from './api.ts'

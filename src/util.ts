@@ -411,3 +411,209 @@ export interface GFF3Sequence {
 }
 
 export type GFF3Item = GFF3Feature | GFF3Directive | GFF3Comment | GFF3Sequence
+
+// JBrowse format types and parsing functions
+
+const JBROWSE_DEFAULT_FIELDS = new Set([
+  'start',
+  'end',
+  'seq_id',
+  'score',
+  'type',
+  'source',
+  'phase',
+  'strand',
+])
+
+export interface JBrowseFeature {
+  start: number
+  end: number
+  strand?: number
+  type: string | null
+  source: string | null
+  refName: string
+  phase?: number
+  score?: number
+  subfeatures: JBrowseFeature[]
+  [key: string]: unknown
+}
+
+function parseStrand(s: string) {
+  if (s === '+') {
+    return 1
+  }
+  if (s === '-') {
+    return -1
+  }
+  if (s === '.') {
+    return 0
+  }
+  return undefined
+}
+
+export function parseAttributesJBrowse(
+  attrString: string,
+  result: Record<string, unknown>,
+) {
+  if (attrString.length === 0 || attrString === '.') {
+    return
+  }
+
+  let len = attrString.length
+  if (attrString[len - 1] === '\n') {
+    len = attrString[len - 2] === '\r' ? len - 2 : len - 1
+    attrString = attrString.slice(0, len)
+  }
+
+  let start = 0
+  while (start < len) {
+    let semiIdx = attrString.indexOf(';', start)
+    if (semiIdx === -1) {
+      semiIdx = len
+    }
+
+    if (semiIdx > start) {
+      const eqIdx = attrString.indexOf('=', start)
+      if (eqIdx !== -1 && eqIdx < semiIdx && eqIdx + 1 < semiIdx) {
+        const tag = attrString.slice(start, eqIdx)
+        if (tag === '_lineHash') {
+          start = semiIdx + 1
+          continue
+        }
+
+        let key = tag.toLowerCase()
+        if (JBROWSE_DEFAULT_FIELDS.has(key)) {
+          key += '2'
+        }
+
+        const values: string[] = []
+        let valStart = eqIdx + 1
+        while (valStart < semiIdx) {
+          let commaIdx = attrString.indexOf(',', valStart)
+          if (commaIdx === -1 || commaIdx > semiIdx) {
+            commaIdx = semiIdx
+          }
+          if (commaIdx > valStart) {
+            const val = attrString.slice(valStart, commaIdx)
+            values.push(unescape(val))
+          }
+          valStart = commaIdx + 1
+        }
+
+        result[key] = values.length === 1 ? values[0] : values
+      }
+    }
+    start = semiIdx + 1
+  }
+}
+
+export function parseAttributesJBrowseNoUnescape(
+  attrString: string,
+  result: Record<string, unknown>,
+) {
+  if (attrString.length === 0 || attrString === '.') {
+    return
+  }
+
+  let len = attrString.length
+  if (attrString[len - 1] === '\n') {
+    len = attrString[len - 2] === '\r' ? len - 2 : len - 1
+    attrString = attrString.slice(0, len)
+  }
+
+  let start = 0
+  while (start < len) {
+    let semiIdx = attrString.indexOf(';', start)
+    if (semiIdx === -1) {
+      semiIdx = len
+    }
+
+    if (semiIdx > start) {
+      const eqIdx = attrString.indexOf('=', start)
+      if (eqIdx !== -1 && eqIdx < semiIdx && eqIdx + 1 < semiIdx) {
+        const tag = attrString.slice(start, eqIdx)
+        if (tag === '_lineHash') {
+          start = semiIdx + 1
+          continue
+        }
+
+        let key = tag.toLowerCase()
+        if (JBROWSE_DEFAULT_FIELDS.has(key)) {
+          key += '2'
+        }
+
+        const values: string[] = []
+        let valStart = eqIdx + 1
+        while (valStart < semiIdx) {
+          let commaIdx = attrString.indexOf(',', valStart)
+          if (commaIdx === -1 || commaIdx > semiIdx) {
+            commaIdx = semiIdx
+          }
+          if (commaIdx > valStart) {
+            values.push(attrString.slice(valStart, commaIdx))
+          }
+          valStart = commaIdx + 1
+        }
+
+        result[key] = values.length === 1 ? values[0] : values
+      }
+    }
+    start = semiIdx + 1
+  }
+}
+
+export function parseFeatureJBrowse(line: string): JBrowseFeature {
+  const f = line.split('\t')
+  const seq_id = f[0]!
+  const source = f[1]!
+  const type = f[2]!
+  const startStr = f[3]!
+  const endStr = f[4]!
+  const scoreStr = f[5]!
+  const strand = f[6]!
+  const phase = f[7]!
+  const attrString = f[8]!
+
+  const result: JBrowseFeature = {
+    refName: seq_id.length === 0 || seq_id === '.' ? '' : unescape(seq_id),
+    source: source.length === 0 || source === '.' ? null : unescape(source),
+    type: type.length === 0 || type === '.' ? null : unescape(type),
+    start: startStr.length === 0 || startStr === '.' ? 0 : +startStr - 1,
+    end: endStr.length === 0 || endStr === '.' ? 0 : +endStr,
+    score: scoreStr.length === 0 || scoreStr === '.' ? undefined : +scoreStr,
+    strand: parseStrand(strand),
+    phase: phase.length === 0 || phase === '.' ? undefined : +phase,
+    subfeatures: [],
+  }
+
+  parseAttributesJBrowse(attrString, result)
+  return result
+}
+
+export function parseFeatureJBrowseNoUnescape(line: string): JBrowseFeature {
+  const f = line.split('\t')
+  const seq_id = f[0]!
+  const source = f[1]!
+  const type = f[2]!
+  const startStr = f[3]!
+  const endStr = f[4]!
+  const scoreStr = f[5]!
+  const strand = f[6]!
+  const phase = f[7]!
+  const attrString = f[8]!
+
+  const result: JBrowseFeature = {
+    refName: seq_id.length === 0 || seq_id === '.' ? '' : seq_id,
+    source: source.length === 0 || source === '.' ? null : source,
+    type: type.length === 0 || type === '.' ? null : type,
+    start: startStr.length === 0 || startStr === '.' ? 0 : +startStr - 1,
+    end: endStr.length === 0 || endStr === '.' ? 0 : +endStr,
+    score: scoreStr.length === 0 || scoreStr === '.' ? undefined : +scoreStr,
+    strand: parseStrand(strand),
+    phase: phase.length === 0 || phase === '.' ? undefined : +phase,
+    subfeatures: [],
+  }
+
+  parseAttributesJBrowseNoUnescape(attrString, result)
+  return result
+}

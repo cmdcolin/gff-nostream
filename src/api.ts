@@ -1,6 +1,15 @@
-import { parseFeature, parseFeatureNoUnescape } from './util.ts'
+import {
+  parseFeature,
+  parseFeatureJBrowse,
+  parseFeatureJBrowseNoUnescape,
+  parseFeatureNoUnescape,
+} from './util.ts'
 
-import type { GFF3Feature, GFF3FeatureLineWithRefs } from './util.ts'
+import type {
+  GFF3Feature,
+  GFF3FeatureLineWithRefs,
+  JBrowseFeature,
+} from './util.ts'
 
 export interface LineRecord {
   line: string
@@ -18,6 +27,20 @@ export interface LineRecord {
  * @returns array of parsed features
  */
 export function parseStringSync(str: string): GFF3Feature[] {
+  return parseRecords(stringToRecords(str))
+}
+
+/**
+ * Synchronously parse a string containing GFF3 directly into JBrowse format.
+ *
+ * @param str - GFF3 string
+ * @returns array of JBrowse-format features
+ */
+export function parseStringSyncJBrowse(str: string): JBrowseFeature[] {
+  return parseRecordsJBrowse(stringToRecords(str))
+}
+
+function stringToRecords(str: string) {
   const lines = str.split(/\r?\n/)
   const records: LineRecord[] = []
   for (let i = 0; i < lines.length; i++) {
@@ -38,7 +61,7 @@ export function parseStringSync(str: string): GFF3Feature[] {
       hasEscapes: line.includes('%'),
     })
   }
-  return parseRecords(records)
+  return records
 }
 
 /**
@@ -127,6 +150,75 @@ export function parseRecords(records: LineRecord[]): GFF3Feature[] {
   return items
 }
 
+/**
+ * Parse an array of LineRecord objects directly into JBrowse feature format.
+ * Supports parent/child relationships via subfeatures.
+ *
+ * @param records - Array of LineRecord objects with raw line and metadata
+ * @returns array of JBrowse-format features
+ */
+export function parseRecordsJBrowse(records: LineRecord[]): JBrowseFeature[] {
+  const items: JBrowseFeature[] = []
+  const byId = new Map<string, JBrowseFeature>()
+  const orphans = new Map<string, JBrowseFeature[]>()
+
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i]!
+    const feature = record.hasEscapes
+      ? parseFeatureJBrowse(record.line)
+      : parseFeatureJBrowseNoUnescape(record.line)
+
+    if (record.lineHash !== undefined) {
+      feature._lineHash = String(record.lineHash)
+    }
+
+    const id = feature.id as string | undefined
+    const parent = feature.parent as string | string[] | undefined
+
+    if (!id && !parent) {
+      items.push(feature)
+      continue
+    }
+
+    if (id) {
+      const existing = byId.get(id)
+      if (!existing) {
+        if (!parent) {
+          items.push(feature)
+        }
+        byId.set(id, feature)
+        const waiting = orphans.get(id)
+        if (waiting) {
+          for (let j = 0; j < waiting.length; j++) {
+            feature.subfeatures.push(waiting[j]!)
+          }
+          orphans.delete(id)
+        }
+      }
+    }
+
+    if (parent) {
+      const parents = Array.isArray(parent) ? parent : [parent]
+      for (let j = 0; j < parents.length; j++) {
+        const parentId = parents[j]!
+        const parentFeature = byId.get(parentId)
+        if (parentFeature) {
+          parentFeature.subfeatures.push(feature)
+        } else {
+          let arr = orphans.get(parentId)
+          if (!arr) {
+            arr = []
+            orphans.set(parentId, arr)
+          }
+          arr.push(feature)
+        }
+      }
+    }
+  }
+
+  return items
+}
+
 export type {
   GFF3Comment,
   GFF3Directive,
@@ -135,4 +227,5 @@ export type {
   GFF3FeatureLineWithRefs,
   GFF3Item,
   GFF3Sequence,
+  JBrowseFeature,
 } from './util.ts'
