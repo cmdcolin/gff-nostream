@@ -1,19 +1,8 @@
-import Parser from './parse.ts'
-import {
-  parseFeature,
-  parseFeatureNoUnescape,
-  parseFieldsArray,
-  parseFieldsArrayNoUnescape,
-} from './util.ts'
+import { parseFeature, parseFeatureNoUnescape } from './util.ts'
 
-import type { GFF3Feature, GFF3FeatureLine } from './util.ts'
+import type { GFF3Feature, GFF3FeatureLineWithRefs } from './util.ts'
 
 export interface LineRecord {
-  fields: string[]
-  lineHash?: string | number
-}
-
-export interface RawLineRecord {
   line: string
   lineHash?: string | number
   start: number
@@ -26,156 +15,114 @@ export interface RawLineRecord {
  * parsed items.
  *
  * @param str - GFF3 string
- * @param inputOptions - Parsing options
- * @returns array of parsed features, directives, comments and/or sequences
+ * @returns array of parsed features
  */
 export function parseStringSync(str: string): GFF3Feature[] {
-  const items: GFF3Feature[] = []
-  const parser = new Parser({
-    featureCallback: arg => items.push(arg),
-    disableDerivesFromReferences: true,
-    errorCallback: err => {
-      throw new Error(err)
-    },
-  })
-
-  for (const line of str.split(/\r?\n/)) {
-    parser.addLine(line)
+  const lines = str.split(/\r?\n/)
+  const records: LineRecord[] = []
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!
+    if (line.length === 0 || line[0] === '#') {
+      if (line.startsWith('##FASTA')) {
+        break
+      }
+      continue
+    }
+    if (line[0] === '>') {
+      break
+    }
+    records.push({
+      line,
+      start: 0,
+      end: 0,
+      hasEscapes: line.includes('%'),
+    })
   }
-  parser.finish()
-
-  return items
+  return parseRecords(records)
 }
 
 /**
- * Synchronously parse an array of strings containing GFF3 and return an array of the
- * parsed items.
+ * Parse an array of LineRecord objects containing raw GFF3 lines.
+ * Supports parent/child relationships.
  *
- * @param arr - GFF3 array of strings
- * @param inputOptions - Parsing options
- * @returns array of parsed features, directives, comments and/or sequences
- */
-export function parseArraySync(arr: string[]): GFF3Feature[] {
-  const items: GFF3Feature[] = []
-  const parser = new Parser({
-    featureCallback: arg => items.push(arg),
-    disableDerivesFromReferences: true,
-    errorCallback: err => {
-      throw new Error(err)
-    },
-  })
-
-  for (const line of arr) {
-    parser.addLine(line)
-  }
-  parser.finish()
-
-  return items
-}
-
-/**
- * Synchronously parse an array of LineRecord objects containing pre-split GFF3
- * fields and return an array of the parsed items.
- *
- * @param records - Array of LineRecord objects with fields array and optional lineHash
+ * @param records - Array of LineRecord objects with raw line and metadata
  * @returns array of parsed features
  */
-export function parseRecordsSync(records: LineRecord[]): GFF3Feature[] {
+export function parseRecords(records: LineRecord[]): GFF3Feature[] {
   const items: GFF3Feature[] = []
-  const parser = new Parser({
-    featureCallback: arg => items.push(arg),
-    disableDerivesFromReferences: true,
-    errorCallback: err => {
-      throw new Error(err)
-    },
-  })
+  const byId = new Map<string, GFF3Feature>()
+  const orphans = new Map<string, GFF3Feature[]>()
 
-  for (const record of records) {
-    const featureLine: GFF3FeatureLine = parseFieldsArray(record.fields)
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i]!
+    const featureLine = (
+      record.hasEscapes
+        ? parseFeature(record.line)
+        : parseFeatureNoUnescape(record.line)
+    ) as GFF3FeatureLineWithRefs
+    featureLine.child_features = []
+    featureLine.derived_features = []
+
     if (record.lineHash !== undefined) {
       if (!featureLine.attributes) {
         featureLine.attributes = {}
       }
       featureLine.attributes._lineHash = [String(record.lineHash)]
     }
-    parser.addParsedFeatureLine(featureLine)
-  }
-  parser.finish()
 
-  return items
-}
+    const attrs = featureLine.attributes
+    const ids = attrs?.ID
+    const parents = attrs?.Parent
 
-/**
- * Synchronously parse an array of LineRecord objects containing pre-split GFF3
- * fields and return an array of the parsed items. Uses a fast path that skips
- * unescaping when hasEscapes is false.
- *
- * @param records - Array of LineRecord objects with fields array and optional lineHash
- * @param hasEscapes - Whether the records contain percent-encoded characters
- * @returns array of parsed features
- */
-export function parseRecordsSyncFast(
-  records: LineRecord[],
-  hasEscapes: boolean,
-): GFF3Feature[] {
-  const items: GFF3Feature[] = []
-  const parser = new Parser({
-    featureCallback: arg => items.push(arg),
-    disableDerivesFromReferences: true,
-    errorCallback: err => {
-      throw new Error(err)
-    },
-  })
-
-  const parseFunc = hasEscapes ? parseFieldsArray : parseFieldsArrayNoUnescape
-
-  for (const record of records) {
-    const featureLine: GFF3FeatureLine = parseFunc(record.fields)
-    if (record.lineHash !== undefined) {
-      if (!featureLine.attributes) {
-        featureLine.attributes = {}
-      }
-      featureLine.attributes._lineHash = [String(record.lineHash)]
+    if (!ids && !parents) {
+      items.push([featureLine])
+      continue
     }
-    parser.addParsedFeatureLine(featureLine)
-  }
-  parser.finish()
 
-  return items
-}
-
-/**
- * Synchronously parse an array of RawLineRecord objects containing raw GFF3
- * lines with pre-parsed coordinates and per-line hasEscapes hints.
- *
- * @param records - Array of RawLineRecord objects with raw line, coordinates, and hasEscapes hint
- * @returns array of parsed features
- */
-export function parseRawRecordsSyncFast(
-  records: RawLineRecord[],
-): GFF3Feature[] {
-  const items: GFF3Feature[] = []
-  const parser = new Parser({
-    featureCallback: arg => items.push(arg),
-    disableDerivesFromReferences: true,
-    errorCallback: err => {
-      throw new Error(err)
-    },
-  })
-
-  for (const record of records) {
-    const featureLine: GFF3FeatureLine = record.hasEscapes
-      ? parseFeature(record.line)
-      : parseFeatureNoUnescape(record.line)
-    if (record.lineHash !== undefined) {
-      if (!featureLine.attributes) {
-        featureLine.attributes = {}
+    let feature: GFF3Feature
+    if (ids) {
+      const id = ids[0]!
+      const existing = byId.get(id)
+      if (existing) {
+        existing.push(featureLine)
+        feature = existing
+      } else {
+        feature = [featureLine]
+        if (!parents) {
+          items.push(feature)
+        }
+        byId.set(id, feature)
+        const waiting = orphans.get(id)
+        if (waiting) {
+          for (let j = 0; j < waiting.length; j++) {
+            featureLine.child_features.push(waiting[j]!)
+          }
+          orphans.delete(id)
+        }
       }
-      featureLine.attributes._lineHash = [String(record.lineHash)]
+    } else {
+      feature = [featureLine]
     }
-    parser.addParsedFeatureLine(featureLine)
+
+    if (parents) {
+      for (let j = 0; j < parents.length; j++) {
+        const parentId = parents[j]!
+        const parent = byId.get(parentId)
+        if (parent) {
+          for (let k = 0; k < parent.length; k++) {
+            parent[k]!.child_features.push(feature)
+          }
+        } else {
+          let arr = orphans.get(parentId)
+          if (!arr) {
+            arr = []
+            orphans.set(parentId, arr)
+          }
+          arr.push(feature)
+        }
+      }
+    }
   }
-  parser.finish()
 
   return items
 }

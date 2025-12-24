@@ -25,61 +25,8 @@ for (let i = 0; i < 256; i++) {
  * @returns An unescaped string value
  */
 
-export function unescape(stringVal: string): string {
-  const idx = stringVal.indexOf('%')
-  if (idx === -1) {
-    return stringVal
-  }
-
-  let result = ''
-  let lastIdx = 0
-  let i = idx
-
-  while (i < stringVal.length) {
-    if (stringVal[i] === '%' && i + 2 < stringVal.length) {
-      result += stringVal.slice(lastIdx, i)
-      const hex = stringVal.slice(i + 1, i + 3)
-      const char = HEX_LOOKUP[hex]
-      if (char !== undefined) {
-        result += char
-      } else {
-        result += stringVal.slice(i, i + 3)
-      }
-      i += 3
-      lastIdx = i
-    } else {
-      i++
-    }
-  }
-
-  return result + stringVal.slice(lastIdx)
-}
-
-function _escape(regex: RegExp, s: string | number) {
-  return String(s).replace(regex, ch => {
-    const hex = ch.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')
-    return `%${hex}`
-  })
-}
-
-/**
- * Escape a value for use in a GFF3 attribute value.
- *
- * @param rawVal - Raw GFF3 attribute value
- * @returns An escaped string value
- */
-export function escape(rawVal: string | number): string {
-  return _escape(attrEscapeRegex, rawVal)
-}
-
-/**
- * Escape a value for use in a GFF3 column value.
- *
- * @param rawVal - Raw GFF3 column value
- * @returns An escaped column value
- */
-export function escapeColumn(rawVal: string | number): string {
-  return _escape(columnEscapeRegex, rawVal)
+export function unescape(s: string): string {
+  return s.indexOf('%') === -1 ? s : decodeURIComponent(s)
 }
 
 /**
@@ -126,7 +73,7 @@ export function parseAttributes(attrString: string): GFF3Attributes {
           }
           if (commaIdx > valStart) {
             const val = attrString.slice(valStart, commaIdx)
-            arec.push(val.indexOf('%') === -1 ? val : unescape(val))
+            arec.push(unescape(val))
           }
           valStart = commaIdx + 1
         }
@@ -193,10 +140,7 @@ export function parseAttributesNoUnescape(attrString: string): GFF3Attributes {
 }
 
 function normUnescape(s: string) {
-  if (s.length === 0 || s === '.') {
-    return null
-  }
-  return s.indexOf('%') === -1 ? s : unescape(s)
+  return s.length === 0 || s === '.' ? null : unescape(s)
 }
 
 function norm(s: string) {
@@ -210,32 +154,24 @@ function norm(s: string) {
  * @returns The parsed feature
  */
 export function parseFeature(line: string): GFF3FeatureLine {
-  const t0 = line.indexOf('\t')
-  const t1 = line.indexOf('\t', t0 + 1)
-  const t2 = line.indexOf('\t', t1 + 1)
-  const t3 = line.indexOf('\t', t2 + 1)
-  const t4 = line.indexOf('\t', t3 + 1)
-  const t5 = line.indexOf('\t', t4 + 1)
-  const t6 = line.indexOf('\t', t5 + 1)
-  const t7 = line.indexOf('\t', t6 + 1)
-
-  const seq_id = line.slice(0, t0)
-  const source = line.slice(t0 + 1, t1)
-  const type = line.slice(t1 + 1, t2)
-  const startStr = line.slice(t2 + 1, t3)
-  const endStr = line.slice(t3 + 1, t4)
-  const scoreStr = line.slice(t4 + 1, t5)
-  const strand = line.slice(t5 + 1, t6)
-  const phase = line.slice(t6 + 1, t7)
-  const attrString = line.slice(t7 + 1)
+  const f = line.split('\t')
+  const seq_id = f[0]!
+  const source = f[1]!
+  const type = f[2]!
+  const startStr = f[3]!
+  const endStr = f[4]!
+  const scoreStr = f[5]!
+  const strand = f[6]!
+  const phase = f[7]!
+  const attrString = f[8]!
 
   return {
     seq_id: normUnescape(seq_id),
     source: normUnescape(source),
     type: normUnescape(type),
-    start: startStr.length === 0 || startStr === '.' ? null : parseInt(startStr, 10),
-    end: endStr.length === 0 || endStr === '.' ? null : parseInt(endStr, 10),
-    score: scoreStr.length === 0 || scoreStr === '.' ? null : parseFloat(scoreStr),
+    start: startStr.length === 0 || startStr === '.' ? null : +startStr,
+    end: endStr.length === 0 || endStr === '.' ? null : +endStr,
+    score: scoreStr.length === 0 || scoreStr === '.' ? null : +scoreStr,
     strand: norm(strand),
     phase: norm(phase),
     attributes: attrString.length === 0 || attrString === '.' ? null : parseAttributes(attrString),
@@ -250,32 +186,24 @@ export function parseFeature(line: string): GFF3FeatureLine {
  * @returns The parsed feature
  */
 export function parseFeatureNoUnescape(line: string): GFF3FeatureLine {
-  const t0 = line.indexOf('\t')
-  const t1 = line.indexOf('\t', t0 + 1)
-  const t2 = line.indexOf('\t', t1 + 1)
-  const t3 = line.indexOf('\t', t2 + 1)
-  const t4 = line.indexOf('\t', t3 + 1)
-  const t5 = line.indexOf('\t', t4 + 1)
-  const t6 = line.indexOf('\t', t5 + 1)
-  const t7 = line.indexOf('\t', t6 + 1)
-
-  const seq_id = line.slice(0, t0)
-  const source = line.slice(t0 + 1, t1)
-  const type = line.slice(t1 + 1, t2)
-  const startStr = line.slice(t2 + 1, t3)
-  const endStr = line.slice(t3 + 1, t4)
-  const scoreStr = line.slice(t4 + 1, t5)
-  const strand = line.slice(t5 + 1, t6)
-  const phase = line.slice(t6 + 1, t7)
-  const attrString = line.slice(t7 + 1)
+  const f = line.split('\t')
+  const seq_id = f[0]!
+  const source = f[1]!
+  const type = f[2]!
+  const startStr = f[3]!
+  const endStr = f[4]!
+  const scoreStr = f[5]!
+  const strand = f[6]!
+  const phase = f[7]!
+  const attrString = f[8]!
 
   return {
     seq_id: norm(seq_id),
     source: norm(source),
     type: norm(type),
-    start: startStr.length === 0 || startStr === '.' ? null : parseInt(startStr, 10),
-    end: endStr.length === 0 || endStr === '.' ? null : parseInt(endStr, 10),
-    score: scoreStr.length === 0 || scoreStr === '.' ? null : parseFloat(scoreStr),
+    start: startStr.length === 0 || startStr === '.' ? null : +startStr,
+    end: endStr.length === 0 || endStr === '.' ? null : +endStr,
+    score: scoreStr.length === 0 || scoreStr === '.' ? null : +scoreStr,
     strand: norm(strand),
     phase: norm(phase),
     attributes: attrString.length === 0 || attrString === '.' ? null : parseAttributesNoUnescape(attrString),
@@ -305,9 +233,9 @@ export function parseFieldsArray(
     seq_id: seq_id ? normUnescape(seq_id) : null,
     source: source ? normUnescape(source) : null,
     type: type ? normUnescape(type) : null,
-    start: !startStr || startStr === '.' ? null : parseInt(startStr, 10),
-    end: !endStr || endStr === '.' ? null : parseInt(endStr, 10),
-    score: !scoreStr || scoreStr === '.' ? null : parseFloat(scoreStr),
+    start: !startStr || startStr === '.' ? null : +startStr,
+    end: !endStr || endStr === '.' ? null : +endStr,
+    score: !scoreStr || scoreStr === '.' ? null : +scoreStr,
     strand: strand && strand !== '.' ? strand : null,
     phase: phase && phase !== '.' ? phase : null,
     attributes: !attrString || attrString === '.' ? null : parseAttributes(attrString),
@@ -338,9 +266,9 @@ export function parseFieldsArrayNoUnescape(
     seq_id: seq_id && seq_id !== '.' ? seq_id : null,
     source: source && source !== '.' ? source : null,
     type: type && type !== '.' ? type : null,
-    start: !startStr || startStr === '.' ? null : parseInt(startStr, 10),
-    end: !endStr || endStr === '.' ? null : parseInt(endStr, 10),
-    score: !scoreStr || scoreStr === '.' ? null : parseFloat(scoreStr),
+    start: !startStr || startStr === '.' ? null : +startStr,
+    end: !endStr || endStr === '.' ? null : +endStr,
+    score: !scoreStr || scoreStr === '.' ? null : +scoreStr,
     strand: strand && strand !== '.' ? strand : null,
     phase: phase && phase !== '.' ? phase : null,
     attributes: !attrString || attrString === '.' ? null : parseAttributesNoUnescape(attrString),
@@ -395,171 +323,6 @@ export function parseDirective(
   return parsed
 }
 
-/**
- * Format an attributes object into a string suitable for the 9th column of GFF3.
- *
- * @param attrs - Attributes
- * @returns GFF3 9th column string
- */
-export function formatAttributes(attrs: GFF3Attributes): string {
-  const attrOrder: string[] = []
-  for (const [tag, val] of Object.entries(attrs)) {
-    if (!val) {
-      continue
-    }
-    attrOrder.push(`${escape(tag)}=${val.map(escape).join(',')}`)
-  }
-  return attrOrder.length ? attrOrder.join(';') : '.'
-}
-
-function _formatSingleFeature(
-  f: GFF3FeatureLine | GFF3FeatureLineWithRefs,
-  seenFeature: Record<string, boolean | undefined>,
-) {
-  const attrString =
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    f.attributes === null || f.attributes === undefined
-      ? '.'
-      : formatAttributes(f.attributes)
-
-  const fields = [
-    f.seq_id === null ? '.' : escapeColumn(f.seq_id),
-    f.source === null ? '.' : escapeColumn(f.source),
-    f.type === null ? '.' : escapeColumn(f.type),
-    f.start === null ? '.' : escapeColumn(f.start),
-    f.end === null ? '.' : escapeColumn(f.end),
-    f.score === null ? '.' : escapeColumn(f.score),
-    f.strand === null ? '.' : escapeColumn(f.strand),
-    f.phase === null ? '.' : escapeColumn(f.phase),
-    attrString,
-  ]
-
-  const formattedString = `${fields.join('\t')}\n`
-
-  // if we have already output this exact feature, skip it
-  if (seenFeature[formattedString]) {
-    return ''
-  }
-
-  seenFeature[formattedString] = true
-  return formattedString
-}
-
-function _formatFeature(
-  feature:
-    | GFF3FeatureLine
-    | GFF3FeatureLineWithRefs
-    | (GFF3FeatureLine | GFF3FeatureLineWithRefs)[],
-  seenFeature: Record<string, boolean | undefined>,
-): string {
-  if (Array.isArray(feature)) {
-    return feature.map(f => _formatFeature(f, seenFeature)).join('')
-  }
-
-  const strings = [_formatSingleFeature(feature, seenFeature)]
-  if (_isFeatureLineWithRefs(feature)) {
-    strings.push(
-      ...feature.child_features.map(f => _formatFeature(f, seenFeature)),
-      ...feature.derived_features.map(f => _formatFeature(f, seenFeature)),
-    )
-  }
-  return strings.join('')
-}
-
-/**
- * Format a feature object or array of feature objects into one or more lines of
- * GFF3.
- *
- * @param featureOrFeatures - A feature object or array of feature objects
- * @returns A string of one or more GFF3 lines
- */
-export function formatFeature(
-  featureOrFeatures:
-    | GFF3FeatureLine
-    | GFF3FeatureLineWithRefs
-    | (GFF3FeatureLine | GFF3FeatureLineWithRefs)[],
-): string {
-  const seen = {}
-  return _formatFeature(featureOrFeatures, seen)
-}
-
-/**
- * Format a directive into a line of GFF3.
- *
- * @param directive - A directive object
- * @returns A directive line string
- */
-export function formatDirective(directive: GFF3Directive): string {
-  let str = `##${directive.directive}`
-  if (directive.value) {
-    str += ` ${directive.value}`
-  }
-  str += '\n'
-  return str
-}
-
-/**
- * Format a comment into a GFF3 comment.
- * Yes I know this is just adding a # and a newline.
- *
- * @param comment - A comment object
- * @returns A comment line string
- */
-export function formatComment(comment: GFF3Comment): string {
-  return `# ${comment.comment}\n`
-}
-
-/**
- * Format a sequence object as FASTA
- *
- * @param seq - A sequence object
- * @returns Formatted single FASTA sequence string
- */
-export function formatSequence(seq: GFF3Sequence): string {
-  return `>${seq.id}${seq.description ? ` ${seq.description}` : ''}\n${
-    seq.sequence
-  }\n`
-}
-
-/**
- * Format a directive, comment, sequence, or feature, or array of such items,
- * into one or more lines of GFF3.
- *
- * @param itemOrItems - A comment, sequence, or feature, or array of such items
- * @returns A formatted string or array of strings
- */
-export function formatItem(
-  itemOrItems:
-    | GFF3FeatureLineWithRefs
-    | GFF3Directive
-    | GFF3Comment
-    | GFF3Sequence
-    | (GFF3FeatureLineWithRefs | GFF3Directive | GFF3Comment | GFF3Sequence)[],
-): string | string[] {
-  function formatSingleItem(
-    item: GFF3FeatureLineWithRefs | GFF3Directive | GFF3Comment | GFF3Sequence,
-  ) {
-    if ('attributes' in item) {
-      return formatFeature(item)
-    }
-    if ('directive' in item) {
-      return formatDirective(item)
-    }
-    if ('sequence' in item) {
-      return formatSequence(item)
-    }
-    if ('comment' in item) {
-      return formatComment(item)
-    }
-    return '# (invalid item found during format)\n'
-  }
-
-  if (Array.isArray(itemOrItems)) {
-    return itemOrItems.map(formatSingleItem)
-  }
-  return formatSingleItem(itemOrItems)
-}
-
 /** A record of GFF3 attribute identifiers and the values of those identifiers */
 export type GFF3Attributes = Record<string, string[] | undefined>
 
@@ -594,17 +357,6 @@ export interface GFF3FeatureLineWithRefs extends GFF3FeatureLine {
   child_features: GFF3Feature[]
   /** An array of features derived from this feature */
   derived_features: GFF3Feature[]
-}
-
-function _isFeatureLineWithRefs(
-  featureLine: GFF3FeatureLine | GFF3FeatureLineWithRefs,
-): featureLine is GFF3FeatureLineWithRefs {
-  return (
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    (featureLine as GFF3FeatureLineWithRefs).child_features !== undefined &&
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    (featureLine as GFF3FeatureLineWithRefs).derived_features !== undefined
-  )
 }
 
 /**
