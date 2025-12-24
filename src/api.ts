@@ -1,11 +1,24 @@
 import Parser from './parse.ts'
-import { parseFieldsArray, parseFieldsArrayNoUnescape } from './util.ts'
+import {
+  parseFeature,
+  parseFeatureNoUnescape,
+  parseFieldsArray,
+  parseFieldsArrayNoUnescape,
+} from './util.ts'
 
 import type { GFF3Feature, GFF3FeatureLine } from './util.ts'
 
 export interface LineRecord {
   fields: string[]
   lineHash?: string | number
+}
+
+export interface RawLineRecord {
+  line: string
+  lineHash?: string | number
+  start: number
+  end: number
+  hasEscapes: boolean
 }
 
 /**
@@ -118,6 +131,42 @@ export function parseRecordsSyncFast(
 
   for (const record of records) {
     const featureLine: GFF3FeatureLine = parseFunc(record.fields)
+    if (record.lineHash !== undefined) {
+      if (!featureLine.attributes) {
+        featureLine.attributes = {}
+      }
+      featureLine.attributes._lineHash = [String(record.lineHash)]
+    }
+    parser.addParsedFeatureLine(featureLine)
+  }
+  parser.finish()
+
+  return items
+}
+
+/**
+ * Synchronously parse an array of RawLineRecord objects containing raw GFF3
+ * lines with pre-parsed coordinates and per-line hasEscapes hints.
+ *
+ * @param records - Array of RawLineRecord objects with raw line, coordinates, and hasEscapes hint
+ * @returns array of parsed features
+ */
+export function parseRawRecordsSyncFast(
+  records: RawLineRecord[],
+): GFF3Feature[] {
+  const items: GFF3Feature[] = []
+  const parser = new Parser({
+    featureCallback: arg => items.push(arg),
+    disableDerivesFromReferences: true,
+    errorCallback: err => {
+      throw new Error(err)
+    },
+  })
+
+  for (const record of records) {
+    const featureLine: GFF3FeatureLine = record.hasEscapes
+      ? parseFeature(record.line)
+      : parseFeatureNoUnescape(record.line)
     if (record.lineHash !== undefined) {
       if (!featureLine.attributes) {
         featureLine.attributes = {}

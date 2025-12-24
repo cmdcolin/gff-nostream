@@ -243,6 +243,46 @@ export function parseFeature(line: string): GFF3FeatureLine {
 }
 
 /**
+ * Parse a GFF3 feature line without unescaping.
+ * Fast path for data known to contain no escaped characters.
+ *
+ * @param line - GFF3 feature line
+ * @returns The parsed feature
+ */
+export function parseFeatureNoUnescape(line: string): GFF3FeatureLine {
+  const t0 = line.indexOf('\t')
+  const t1 = line.indexOf('\t', t0 + 1)
+  const t2 = line.indexOf('\t', t1 + 1)
+  const t3 = line.indexOf('\t', t2 + 1)
+  const t4 = line.indexOf('\t', t3 + 1)
+  const t5 = line.indexOf('\t', t4 + 1)
+  const t6 = line.indexOf('\t', t5 + 1)
+  const t7 = line.indexOf('\t', t6 + 1)
+
+  const seq_id = line.slice(0, t0)
+  const source = line.slice(t0 + 1, t1)
+  const type = line.slice(t1 + 1, t2)
+  const startStr = line.slice(t2 + 1, t3)
+  const endStr = line.slice(t3 + 1, t4)
+  const scoreStr = line.slice(t4 + 1, t5)
+  const strand = line.slice(t5 + 1, t6)
+  const phase = line.slice(t6 + 1, t7)
+  const attrString = line.slice(t7 + 1)
+
+  return {
+    seq_id: norm(seq_id),
+    source: norm(source),
+    type: norm(type),
+    start: startStr.length === 0 || startStr === '.' ? null : parseInt(startStr, 10),
+    end: endStr.length === 0 || endStr === '.' ? null : parseInt(endStr, 10),
+    score: scoreStr.length === 0 || scoreStr === '.' ? null : parseFloat(scoreStr),
+    strand: norm(strand),
+    phase: norm(phase),
+    attributes: attrString.length === 0 || attrString === '.' ? null : parseAttributesNoUnescape(attrString),
+  }
+}
+
+/**
  * Parse a GFF3 feature from a pre-split fields array
  *
  * @param f - Array of 9 GFF3 column values (use null or '.' for empty values)
