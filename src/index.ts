@@ -1,5 +1,15 @@
-import { parseArraySync, parseRecordsSync, parseRecordsSyncFast, parseStringSync } from './api.ts'
-export { parseArraySync, parseRecordsSync, parseRecordsSyncFast, parseStringSync }
+import {
+  parseArraySync,
+  parseRecordsSync,
+  parseRecordsSyncFast,
+  parseStringSync,
+} from './api.ts'
+export {
+  parseArraySync,
+  parseRecordsSync,
+  parseRecordsSyncFast,
+  parseStringSync,
+}
 
 export type {
   GFF3Comment,

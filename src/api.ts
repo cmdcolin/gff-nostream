@@ -101,7 +101,10 @@ export function parseRecordsSync(records: LineRecord[]): GFF3Feature[] {
  * @param hasEscapes - Whether the records contain percent-encoded characters
  * @returns array of parsed features
  */
-export function parseRecordsSyncFast(records: LineRecord[], hasEscapes: boolean): GFF3Feature[] {
+export function parseRecordsSyncFast(
+  records: LineRecord[],
+  hasEscapes: boolean,
+): GFF3Feature[] {
   const items: GFF3Feature[] = []
   const parser = new Parser({
     featureCallback: arg => items.push(arg),

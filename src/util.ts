@@ -11,6 +11,13 @@ const attrEscapeRegex = /[\n;\r\t=%&,\u0000-\u001f\u007f-\u00ff]/g
 // eslint-disable-next-line no-control-regex
 const columnEscapeRegex = /[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g
 
+const HEX_LOOKUP: Record<string, string> = {}
+for (let i = 0; i < 256; i++) {
+  const hex = i.toString(16).toUpperCase().padStart(2, '0')
+  HEX_LOOKUP[hex] = String.fromCharCode(i)
+  HEX_LOOKUP[hex.toLowerCase()] = String.fromCharCode(i)
+}
+
 /**
  * Unescape a string value used in a GFF3 attribute.
  *
@@ -19,12 +26,33 @@ const columnEscapeRegex = /[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g
  */
 
 export function unescape(stringVal: string): string {
-  if (!stringVal.includes('%')) {
+  const idx = stringVal.indexOf('%')
+  if (idx === -1) {
     return stringVal
   }
-  return stringVal.replaceAll(escapeRegex, (_match, seq) =>
-    String.fromCharCode(parseInt(seq, 16)),
-  )
+
+  let result = ''
+  let lastIdx = 0
+  let i = idx
+
+  while (i < stringVal.length) {
+    if (stringVal[i] === '%' && i + 2 < stringVal.length) {
+      result += stringVal.slice(lastIdx, i)
+      const hex = stringVal.slice(i + 1, i + 3)
+      const char = HEX_LOOKUP[hex]
+      if (char !== undefined) {
+        result += char
+      } else {
+        result += stringVal.slice(i, i + 3)
+      }
+      i += 3
+      lastIdx = i
+    } else {
+      i++
+    }
+  }
+
+  return result + stringVal.slice(lastIdx)
 }
 
 function _escape(regex: RegExp, s: string | number) {
@@ -66,31 +94,64 @@ export function parseAttributes(attrString: string): GFF3Attributes {
   }
 
   const attrs: GFF3Attributes = {}
+  let len = attrString.length
 
-  let str = attrString
-  if (str.endsWith('\n')) {
-    str = str.slice(0, str.endsWith('\r\n') ? -2 : -1)
+  if (attrString[len - 1] === '\n') {
+    len = attrString[len - 2] === '\r' ? len - 2 : len - 1
   }
 
-  for (const a of str.split(';')) {
-    const eqIdx = a.indexOf('=')
-    if (eqIdx === -1) {
-      continue
-    }
-    const value = a.slice(eqIdx + 1)
-    if (!value.length) {
-      continue
-    }
+  let start = 0
+  for (let i = 0; i <= len; i++) {
+    if (i === len || attrString[i] === ';') {
+      if (i > start) {
+        let eqIdx = -1
+        for (let j = start; j < i; j++) {
+          if (attrString[j] === '=') {
+            eqIdx = j
+            break
+          }
+        }
 
-    const tag = a.slice(0, eqIdx).trim()
-    let arec = attrs[tag]
-    if (!arec) {
-      arec = []
-      attrs[tag] = arec
-    }
+        if (eqIdx !== -1 && eqIdx + 1 < i) {
+          let keyStart = start
+          let keyEnd = eqIdx
 
-    for (const s of value.split(',')) {
-      arec.push(unescape(s.trim()))
+          while (keyStart < keyEnd && attrString[keyStart] === ' ') {
+            keyStart++
+          }
+          while (keyEnd > keyStart && attrString[keyEnd - 1] === ' ') {
+            keyEnd--
+          }
+
+          const tag = attrString.slice(keyStart, keyEnd)
+          let arec = attrs[tag]
+          if (!arec) {
+            arec = []
+            attrs[tag] = arec
+          }
+
+          let valStart = eqIdx + 1
+          for (let j = valStart; j <= i; j++) {
+            if (j === i || attrString[j] === ',') {
+              if (j > valStart) {
+                let vs = valStart
+                let ve = j
+
+                while (vs < ve && attrString[vs] === ' ') {
+                  vs++
+                }
+                while (ve > vs && attrString[ve - 1] === ' ') {
+                  ve--
+                }
+
+                arec.push(unescape(attrString.slice(vs, ve)))
+              }
+              valStart = j + 1
+            }
+          }
+        }
+      }
+      start = i + 1
     }
   }
   return attrs
@@ -109,31 +170,64 @@ export function parseAttributesNoUnescape(attrString: string): GFF3Attributes {
   }
 
   const attrs: GFF3Attributes = {}
+  let len = attrString.length
 
-  let str = attrString
-  if (str.endsWith('\n')) {
-    str = str.slice(0, str.endsWith('\r\n') ? -2 : -1)
+  if (attrString[len - 1] === '\n') {
+    len = attrString[len - 2] === '\r' ? len - 2 : len - 1
   }
 
-  for (const a of str.split(';')) {
-    const eqIdx = a.indexOf('=')
-    if (eqIdx === -1) {
-      continue
-    }
-    const value = a.slice(eqIdx + 1)
-    if (!value.length) {
-      continue
-    }
+  let start = 0
+  for (let i = 0; i <= len; i++) {
+    if (i === len || attrString[i] === ';') {
+      if (i > start) {
+        let eqIdx = -1
+        for (let j = start; j < i; j++) {
+          if (attrString[j] === '=') {
+            eqIdx = j
+            break
+          }
+        }
 
-    const tag = a.slice(0, eqIdx).trim()
-    let arec = attrs[tag]
-    if (!arec) {
-      arec = []
-      attrs[tag] = arec
-    }
+        if (eqIdx !== -1 && eqIdx + 1 < i) {
+          let keyStart = start
+          let keyEnd = eqIdx
 
-    for (const s of value.split(',')) {
-      arec.push(s.trim())
+          while (keyStart < keyEnd && attrString[keyStart] === ' ') {
+            keyStart++
+          }
+          while (keyEnd > keyStart && attrString[keyEnd - 1] === ' ') {
+            keyEnd--
+          }
+
+          const tag = attrString.slice(keyStart, keyEnd)
+          let arec = attrs[tag]
+          if (!arec) {
+            arec = []
+            attrs[tag] = arec
+          }
+
+          let valStart = eqIdx + 1
+          for (let j = valStart; j <= i; j++) {
+            if (j === i || attrString[j] === ',') {
+              if (j > valStart) {
+                let vs = valStart
+                let ve = j
+
+                while (vs < ve && attrString[vs] === ' ') {
+                  vs++
+                }
+                while (ve > vs && attrString[ve - 1] === ' ') {
+                  ve--
+                }
+
+                arec.push(attrString.slice(vs, ve))
+              }
+              valStart = j + 1
+            }
+          }
+        }
+      }
+      start = i + 1
     }
   }
   return attrs
@@ -159,7 +253,9 @@ function norm(a: string | null | undefined) {
   return a === '.' || a === '' || a === undefined ? null : a
 }
 
-export function parseFieldsArray(f: (string | null | undefined)[]): GFF3FeatureLine {
+export function parseFieldsArray(
+  f: (string | null | undefined)[],
+): GFF3FeatureLine {
   const seq_id = norm(f[0])
   const source = norm(f[1])
   const type = norm(f[2])
@@ -190,7 +286,9 @@ export function parseFieldsArray(f: (string | null | undefined)[]): GFF3FeatureL
  * @param f - Array of 9 GFF3 column values (use null or '.' for empty values)
  * @returns The parsed feature
  */
-export function parseFieldsArrayNoUnescape(f: (string | null | undefined)[]): GFF3FeatureLine {
+export function parseFieldsArrayNoUnescape(
+  f: (string | null | undefined)[],
+): GFF3FeatureLine {
   const seq_id = norm(f[0])
   const source = norm(f[1])
   const type = norm(f[2])
@@ -210,7 +308,8 @@ export function parseFieldsArrayNoUnescape(f: (string | null | undefined)[]): GF
     score: score === null ? null : parseFloat(score),
     strand,
     phase,
-    attributes: attrString === null ? null : parseAttributesNoUnescape(attrString),
+    attributes:
+      attrString === null ? null : parseAttributesNoUnescape(attrString),
   }
 }
 

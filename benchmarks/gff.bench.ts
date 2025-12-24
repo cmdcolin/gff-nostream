@@ -32,7 +32,7 @@ function benchGFF(
   })
 }
 
-benchGFF('ultralong', 'test/data/tair10_chr1.gff   ', {
+benchGFF('ultralong', 'test/data/tair10_chr1.gff', {
   iterations: 100,
   warmupIterations: 5,
 })
