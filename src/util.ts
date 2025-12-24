@@ -25,8 +25,34 @@ for (let i = 0; i < 256; i++) {
  * @returns An unescaped string value
  */
 
-export function unescape(s: string): string {
-  return s.indexOf('%') === -1 ? s : decodeURIComponent(s)
+export function unescape(stringVal: string) {
+  const idx = stringVal.indexOf('%')
+  if (idx === -1) {
+    return stringVal
+  }
+
+  let result = ''
+  let lastIdx = 0
+  let i = idx
+
+  while (i < stringVal.length) {
+    if (stringVal[i] === '%' && i + 2 < stringVal.length) {
+      result += stringVal.slice(lastIdx, i)
+      const hex = stringVal.slice(i + 1, i + 3)
+      const char = HEX_LOOKUP[hex]
+      if (char !== undefined) {
+        result += char
+      } else {
+        result += stringVal.slice(i, i + 3)
+      }
+      i += 3
+      lastIdx = i
+    } else {
+      i++
+    }
+  }
+
+  return result + stringVal.slice(lastIdx)
 }
 
 /**
