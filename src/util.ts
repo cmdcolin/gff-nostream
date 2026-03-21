@@ -181,15 +181,15 @@ function norm(s: string) {
  */
 export function parseFeature(line: string): GFF3FeatureLine {
   const f = line.split('\t')
-  const seq_id = f[0]!
-  const source = f[1]!
-  const type = f[2]!
-  const startStr = f[3]!
-  const endStr = f[4]!
-  const scoreStr = f[5]!
-  const strand = f[6]!
-  const phase = f[7]!
-  const attrString = f[8]!
+  const seq_id = f[0]
+  const source = f[1]
+  const type = f[2]
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
 
   return {
     seq_id: normUnescape(seq_id),
@@ -213,15 +213,15 @@ export function parseFeature(line: string): GFF3FeatureLine {
  */
 export function parseFeatureNoUnescape(line: string): GFF3FeatureLine {
   const f = line.split('\t')
-  const seq_id = f[0]!
-  const source = f[1]!
-  const type = f[2]!
-  const startStr = f[3]!
-  const endStr = f[4]!
-  const scoreStr = f[5]!
-  const strand = f[6]!
-  const phase = f[7]!
-  const attrString = f[8]!
+  const seq_id = f[0]
+  const source = f[1]
+  const type = f[2]
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
 
   return {
     seq_id: norm(seq_id),
@@ -323,14 +323,14 @@ export function parseDirective(
   let [, , contents] = match
 
   const parsed: GFF3Directive = { directive: name }
-  if (contents!.length) {
-    contents = contents!.replace(lineEndRegex, '')
+  if (contents.length) {
+    contents = contents.replace(lineEndRegex, '')
     parsed.value = contents
   }
 
   // do a little additional parsing for sequence-region and genome-build directives
   if (name === 'sequence-region') {
-    const c = contents!.split(whitespaceRegex, 3)
+    const c = contents.split(whitespaceRegex, 3)
     return {
       ...parsed,
       seq_id: c[0],
@@ -338,7 +338,7 @@ export function parseDirective(
       end: c[2]?.replaceAll(nonDigitRegex, ''),
     } as GFF3SequenceRegionDirective
   } else if (name === 'genome-build') {
-    const [source, buildName] = contents!.split(whitespaceRegex, 2)
+    const [source, buildName] = contents.split(whitespaceRegex, 2)
     return {
       ...parsed,
       source,
@@ -590,15 +590,15 @@ export function parseAttributesJBrowseNoUnescape(
 
 export function parseFeatureJBrowse(line: string): JBrowseFeature {
   const f = line.split('\t')
-  const seq_id = f[0]!
-  const source = f[1]!
-  const type = f[2]!
-  const startStr = f[3]!
-  const endStr = f[4]!
-  const scoreStr = f[5]!
-  const strand = f[6]!
-  const phase = f[7]!
-  const attrString = f[8]!
+  const seq_id = f[0]
+  const source = f[1]
+  const type = f[2]
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
 
   const result: JBrowseFeature = {
     refName: seq_id.length === 0 || seq_id === '.' ? '' : unescape(seq_id),
@@ -618,15 +618,15 @@ export function parseFeatureJBrowse(line: string): JBrowseFeature {
 
 export function parseFeatureJBrowseNoUnescape(line: string): JBrowseFeature {
   const f = line.split('\t')
-  const seq_id = f[0]!
-  const source = f[1]!
-  const type = f[2]!
-  const startStr = f[3]!
-  const endStr = f[4]!
-  const scoreStr = f[5]!
-  const strand = f[6]!
-  const phase = f[7]!
-  const attrString = f[8]!
+  const seq_id = f[0]
+  const source = f[1]
+  const type = f[2]
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
 
   const result: JBrowseFeature = {
     refName: seq_id.length === 0 || seq_id === '.' ? '' : seq_id,

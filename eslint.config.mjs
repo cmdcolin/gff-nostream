@@ -40,6 +40,7 @@ export default defineConfig(
 
       'no-underscore-dangle': 'off',
       curly: 'error',
+      '@typescript-eslint/consistent-type-imports': 'error',
       semi: ['error', 'never'],
 
       '@typescript-eslint/restrict-template-expressions': 'off',

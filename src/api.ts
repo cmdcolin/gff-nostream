@@ -44,14 +44,14 @@ function stringToRecords(str: string) {
   const lines = str.split(/\r?\n/)
   const records: LineRecord[] = []
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!
-    if (line.length === 0 || line[0] === '#') {
+    const line = lines[i]
+    if (line.length === 0 || line.startsWith('#')) {
       if (line.startsWith('##FASTA')) {
         break
       }
       continue
     }
-    if (line[0] === '>') {
+    if (line.startsWith('>')) {
       break
     }
     records.push({
@@ -77,7 +77,7 @@ export function parseRecords(records: LineRecord[]): GFF3Feature[] {
   const orphans = new Map<string, GFF3Feature[]>()
 
   for (let i = 0; i < records.length; i++) {
-    const record = records[i]!
+    const record = records[i]
     const featureLine = (
       record.hasEscapes
         ? parseFeature(record.line)
@@ -104,7 +104,7 @@ export function parseRecords(records: LineRecord[]): GFF3Feature[] {
 
     let feature: GFF3Feature
     if (ids) {
-      const id = ids[0]!
+      const id = ids[0]
       const existing = byId.get(id)
       if (existing) {
         existing.push(featureLine)
@@ -118,7 +118,7 @@ export function parseRecords(records: LineRecord[]): GFF3Feature[] {
         const waiting = orphans.get(id)
         if (waiting) {
           for (let j = 0; j < waiting.length; j++) {
-            featureLine.child_features.push(waiting[j]!)
+            featureLine.child_features.push(waiting[j])
           }
           orphans.delete(id)
         }
@@ -129,11 +129,11 @@ export function parseRecords(records: LineRecord[]): GFF3Feature[] {
 
     if (parents) {
       for (let j = 0; j < parents.length; j++) {
-        const parentId = parents[j]!
+        const parentId = parents[j]
         const parent = byId.get(parentId)
         if (parent) {
           for (let k = 0; k < parent.length; k++) {
-            parent[k]!.child_features.push(feature)
+            parent[k].child_features.push(feature)
           }
         } else {
           let arr = orphans.get(parentId)
@@ -163,7 +163,7 @@ export function parseRecordsJBrowse(records: LineRecord[]): JBrowseFeature[] {
   const orphans = new Map<string, JBrowseFeature[]>()
 
   for (let i = 0; i < records.length; i++) {
-    const record = records[i]!
+    const record = records[i]
     const feature = record.hasEscapes
       ? parseFeatureJBrowse(record.line)
       : parseFeatureJBrowseNoUnescape(record.line)
@@ -190,7 +190,7 @@ export function parseRecordsJBrowse(records: LineRecord[]): JBrowseFeature[] {
         const waiting = orphans.get(id)
         if (waiting) {
           for (let j = 0; j < waiting.length; j++) {
-            feature.subfeatures.push(waiting[j]!)
+            feature.subfeatures.push(waiting[j])
           }
           orphans.delete(id)
         }
@@ -200,7 +200,7 @@ export function parseRecordsJBrowse(records: LineRecord[]): JBrowseFeature[] {
     if (parent) {
       const parents = Array.isArray(parent) ? parent : [parent]
       for (let j = 0; j < parents.length; j++) {
-        const parentId = parents[j]!
+        const parentId = parents[j]
         const parentFeature = byId.get(parentId)
         if (parentFeature) {
           parentFeature.subfeatures.push(feature)
