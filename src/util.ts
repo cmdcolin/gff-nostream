@@ -1,17 +1,12 @@
 // Fast, low-level functions for parsing and formatting GFF3.
 // JavaScript port of Robert Buels's Bio::GFF3::LowLevel Perl module.
 
-const escapeRegex = /%([0-9A-Fa-f]{2})/g
 const directiveRegex = /^\s*##\s*(\S+)\s*(.*)/
 const lineEndRegex = /\r?\n$/
 const whitespaceRegex = /\s+/
 const nonDigitRegex = /\D/g
-// eslint-disable-next-line no-control-regex
-const attrEscapeRegex = /[\n;\r\t=%&,\u0000-\u001f\u007f-\u00ff]/g
-// eslint-disable-next-line no-control-regex
-const columnEscapeRegex = /[\n\r\t%\u0000-\u001f\u007f-\u00ff]/g
 
-const HEX_LOOKUP: Record<string, string> = {}
+const HEX_LOOKUP: Record<string, string | undefined> = {}
 for (let i = 0; i < 256; i++) {
   const hex = i.toString(16).toUpperCase().padStart(2, '0')
   HEX_LOOKUP[hex] = String.fromCharCode(i)
