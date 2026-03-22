@@ -50,13 +50,10 @@ export function unescape(stringVal: string) {
   return result + stringVal.slice(lastIdx)
 }
 
-/**
- * Parse the 9th column (attributes) of a GFF3 feature line.
- *
- * @param attrString - String of GFF3 9th column
- * @returns Parsed attributes
- */
-export function parseAttributes(attrString: string): GFF3Attributes {
+function parseAttributesImpl(
+  attrString: string,
+  shouldUnescape: boolean,
+): GFF3Attributes {
   if (attrString.length === 0 || attrString === '.') {
     return {}
   }
@@ -94,7 +91,7 @@ export function parseAttributes(attrString: string): GFF3Attributes {
           }
           if (commaIdx > valStart) {
             const val = attrString.slice(valStart, commaIdx)
-            arec.push(unescape(val))
+            arec.push(shouldUnescape ? unescape(val) : val)
           }
           valStart = commaIdx + 1
         }
@@ -103,6 +100,16 @@ export function parseAttributes(attrString: string): GFF3Attributes {
     start = semiIdx + 1
   }
   return attrs
+}
+
+/**
+ * Parse the 9th column (attributes) of a GFF3 feature line.
+ *
+ * @param attrString - String of GFF3 9th column
+ * @returns Parsed attributes
+ */
+export function parseAttributes(attrString: string): GFF3Attributes {
+  return parseAttributesImpl(attrString, true)
 }
 
 /**
@@ -113,59 +120,42 @@ export function parseAttributes(attrString: string): GFF3Attributes {
  * @returns Parsed attributes
  */
 export function parseAttributesNoUnescape(attrString: string): GFF3Attributes {
-  if (attrString.length === 0 || attrString === '.') {
-    return {}
-  }
-
-  const attrs: GFF3Attributes = {}
-  let len = attrString.length
-
-  if (attrString[len - 1] === '\n') {
-    len = attrString[len - 2] === '\r' ? len - 2 : len - 1
-    attrString = attrString.slice(0, len)
-  }
-
-  let start = 0
-  while (start < len) {
-    let semiIdx = attrString.indexOf(';', start)
-    if (semiIdx === -1) {
-      semiIdx = len
-    }
-
-    if (semiIdx > start) {
-      const eqIdx = attrString.indexOf('=', start)
-      if (eqIdx !== -1 && eqIdx < semiIdx && eqIdx + 1 < semiIdx) {
-        const tag = attrString.slice(start, eqIdx)
-        let arec = attrs[tag]
-        if (!arec) {
-          arec = []
-          attrs[tag] = arec
-        }
-
-        let valStart = eqIdx + 1
-        while (valStart < semiIdx) {
-          let commaIdx = attrString.indexOf(',', valStart)
-          if (commaIdx === -1 || commaIdx > semiIdx) {
-            commaIdx = semiIdx
-          }
-          if (commaIdx > valStart) {
-            arec.push(attrString.slice(valStart, commaIdx))
-          }
-          valStart = commaIdx + 1
-        }
-      }
-    }
-    start = semiIdx + 1
-  }
-  return attrs
+  return parseAttributesImpl(attrString, false)
 }
 
-function normUnescape(s: string) {
-  return s.length === 0 || s === '.' ? null : unescape(s)
+function normImpl(s: string, shouldUnescape: boolean) {
+  if (s.length === 0 || s === '.') {
+    return null
+  }
+  return shouldUnescape ? unescape(s) : s
 }
 
-function norm(s: string) {
-  return s.length === 0 || s === '.' ? null : s
+function parseFeatureImpl(
+  line: string,
+  shouldUnescape: boolean,
+): GFF3FeatureLine {
+  const f = line.split('\t')
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
+
+  return {
+    seq_id: normImpl(f[0], shouldUnescape),
+    source: normImpl(f[1], shouldUnescape),
+    type: normImpl(f[2], shouldUnescape),
+    start: startStr.length === 0 || startStr === '.' ? null : +startStr,
+    end: endStr.length === 0 || endStr === '.' ? null : +endStr,
+    score: scoreStr.length === 0 || scoreStr === '.' ? null : +scoreStr,
+    strand: normImpl(strand, false),
+    phase: normImpl(phase, false),
+    attributes:
+      attrString.length === 0 || attrString === '.'
+        ? null
+        : parseAttributesImpl(attrString, shouldUnescape),
+  }
 }
 
 /**
@@ -175,28 +165,7 @@ function norm(s: string) {
  * @returns The parsed feature
  */
 export function parseFeature(line: string): GFF3FeatureLine {
-  const f = line.split('\t')
-  const seq_id = f[0]
-  const source = f[1]
-  const type = f[2]
-  const startStr = f[3]
-  const endStr = f[4]
-  const scoreStr = f[5]
-  const strand = f[6]
-  const phase = f[7]
-  const attrString = f[8]
-
-  return {
-    seq_id: normUnescape(seq_id),
-    source: normUnescape(source),
-    type: normUnescape(type),
-    start: startStr.length === 0 || startStr === '.' ? null : +startStr,
-    end: endStr.length === 0 || endStr === '.' ? null : +endStr,
-    score: scoreStr.length === 0 || scoreStr === '.' ? null : +scoreStr,
-    strand: norm(strand),
-    phase: norm(phase),
-    attributes: attrString.length === 0 || attrString === '.' ? null : parseAttributes(attrString),
-  }
+  return parseFeatureImpl(line, true)
 }
 
 /**
@@ -207,7 +176,13 @@ export function parseFeature(line: string): GFF3FeatureLine {
  * @returns The parsed feature
  */
 export function parseFeatureNoUnescape(line: string): GFF3FeatureLine {
-  const f = line.split('\t')
+  return parseFeatureImpl(line, false)
+}
+
+function parseFieldsArrayImpl(
+  f: (string | null | undefined)[],
+  shouldUnescape: boolean,
+): GFF3FeatureLine {
   const seq_id = f[0]
   const source = f[1]
   const type = f[2]
@@ -219,15 +194,18 @@ export function parseFeatureNoUnescape(line: string): GFF3FeatureLine {
   const attrString = f[8]
 
   return {
-    seq_id: norm(seq_id),
-    source: norm(source),
-    type: norm(type),
-    start: startStr.length === 0 || startStr === '.' ? null : +startStr,
-    end: endStr.length === 0 || endStr === '.' ? null : +endStr,
-    score: scoreStr.length === 0 || scoreStr === '.' ? null : +scoreStr,
-    strand: norm(strand),
-    phase: norm(phase),
-    attributes: attrString.length === 0 || attrString === '.' ? null : parseAttributesNoUnescape(attrString),
+    seq_id: seq_id ? normImpl(seq_id, shouldUnescape) : null,
+    source: source ? normImpl(source, shouldUnescape) : null,
+    type: type ? normImpl(type, shouldUnescape) : null,
+    start: !startStr || startStr === '.' ? null : +startStr,
+    end: !endStr || endStr === '.' ? null : +endStr,
+    score: !scoreStr || scoreStr === '.' ? null : +scoreStr,
+    strand: strand && strand !== '.' ? strand : null,
+    phase: phase && phase !== '.' ? phase : null,
+    attributes:
+      !attrString || attrString === '.'
+        ? null
+        : parseAttributesImpl(attrString, shouldUnescape),
   }
 }
 
@@ -240,27 +218,7 @@ export function parseFeatureNoUnescape(line: string): GFF3FeatureLine {
 export function parseFieldsArray(
   f: (string | null | undefined)[],
 ): GFF3FeatureLine {
-  const seq_id = f[0]
-  const source = f[1]
-  const type = f[2]
-  const startStr = f[3]
-  const endStr = f[4]
-  const scoreStr = f[5]
-  const strand = f[6]
-  const phase = f[7]
-  const attrString = f[8]
-
-  return {
-    seq_id: seq_id ? normUnescape(seq_id) : null,
-    source: source ? normUnescape(source) : null,
-    type: type ? normUnescape(type) : null,
-    start: !startStr || startStr === '.' ? null : +startStr,
-    end: !endStr || endStr === '.' ? null : +endStr,
-    score: !scoreStr || scoreStr === '.' ? null : +scoreStr,
-    strand: strand && strand !== '.' ? strand : null,
-    phase: phase && phase !== '.' ? phase : null,
-    attributes: !attrString || attrString === '.' ? null : parseAttributes(attrString),
-  }
+  return parseFieldsArrayImpl(f, true)
 }
 
 /**
@@ -273,27 +231,7 @@ export function parseFieldsArray(
 export function parseFieldsArrayNoUnescape(
   f: (string | null | undefined)[],
 ): GFF3FeatureLine {
-  const seq_id = f[0]
-  const source = f[1]
-  const type = f[2]
-  const startStr = f[3]
-  const endStr = f[4]
-  const scoreStr = f[5]
-  const strand = f[6]
-  const phase = f[7]
-  const attrString = f[8]
-
-  return {
-    seq_id: seq_id && seq_id !== '.' ? seq_id : null,
-    source: source && source !== '.' ? source : null,
-    type: type && type !== '.' ? type : null,
-    start: !startStr || startStr === '.' ? null : +startStr,
-    end: !endStr || endStr === '.' ? null : +endStr,
-    score: !scoreStr || scoreStr === '.' ? null : +scoreStr,
-    strand: strand && strand !== '.' ? strand : null,
-    phase: phase && phase !== '.' ? phase : null,
-    attributes: !attrString || attrString === '.' ? null : parseAttributesNoUnescape(attrString),
-  }
+  return parseFieldsArrayImpl(f, false)
 }
 
 /**
@@ -323,7 +261,6 @@ export function parseDirective(
     parsed.value = contents
   }
 
-  // do a little additional parsing for sequence-region and genome-build directives
   if (name === 'sequence-region') {
     const c = contents.split(whitespaceRegex, 3)
     return {
@@ -446,6 +383,30 @@ const JBROWSE_DEFAULT_FIELDS = new Set([
   'strand',
 ])
 
+// Pre-computed lowercase for common GFF3 spec attribute names to avoid
+// toLowerCase() calls in the hot path
+const COMMON_ATTRS: Record<string, string | undefined> = {
+  ID: 'id',
+  Name: 'name',
+  Parent: 'parent',
+  Note: 'note',
+  Dbxref: 'dbxref',
+  Ontology_term: 'ontology_term',
+  Is_circular: 'is_circular',
+  Alias: 'alias',
+  Target: 'target',
+  Gap: 'gap',
+  Derives_from: 'derives_from',
+  id: 'id',
+  name: 'name',
+  parent: 'parent',
+  note: 'note',
+  dbxref: 'dbxref',
+  alias: 'alias',
+  target: 'target',
+  gap: 'gap',
+}
+
 export interface JBrowseFeature {
   start: number
   end: number
@@ -459,22 +420,10 @@ export interface JBrowseFeature {
   [key: string]: unknown
 }
 
-function parseStrand(s: string) {
-  if (s === '+') {
-    return 1
-  }
-  if (s === '-') {
-    return -1
-  }
-  if (s === '.') {
-    return 0
-  }
-  return undefined
-}
-
-export function parseAttributesJBrowse(
+function parseAttributesJBrowseImpl(
   attrString: string,
   result: Record<string, unknown>,
+  shouldUnescape: boolean,
 ) {
   if (attrString.length === 0 || attrString === '.') {
     return
@@ -502,9 +451,12 @@ export function parseAttributesJBrowse(
           continue
         }
 
-        let key = tag.toLowerCase()
-        if (JBROWSE_DEFAULT_FIELDS.has(key)) {
-          key += '2'
+        let key = COMMON_ATTRS[tag]
+        if (key === undefined) {
+          key = tag.toLowerCase()
+          if (JBROWSE_DEFAULT_FIELDS.has(key)) {
+            key += '2'
+          }
         }
 
         const values: string[] = []
@@ -516,7 +468,7 @@ export function parseAttributesJBrowse(
           }
           if (commaIdx > valStart) {
             const val = attrString.slice(valStart, commaIdx)
-            values.push(unescape(val))
+            values.push(shouldUnescape ? unescape(val) : val)
           }
           valStart = commaIdx + 1
         }
@@ -526,115 +478,79 @@ export function parseAttributesJBrowse(
     }
     start = semiIdx + 1
   }
+}
+
+export function parseAttributesJBrowse(
+  attrString: string,
+  result: Record<string, unknown>,
+) {
+  parseAttributesJBrowseImpl(attrString, result, true)
 }
 
 export function parseAttributesJBrowseNoUnescape(
   attrString: string,
   result: Record<string, unknown>,
 ) {
-  if (attrString.length === 0 || attrString === '.') {
-    return
+  parseAttributesJBrowseImpl(attrString, result, false)
+}
+
+function parseFeatureJBrowseImpl(
+  line: string,
+  shouldUnescape: boolean,
+): JBrowseFeature {
+  const f = line.split('\t')
+  const seq_id = f[0]
+  const source = f[1]
+  const type = f[2]
+  const startStr = f[3]
+  const endStr = f[4]
+  const scoreStr = f[5]
+  const strand = f[6]
+  const phase = f[7]
+  const attrString = f[8]
+
+  const result: JBrowseFeature = {
+    refName:
+      seq_id.length === 0 || seq_id === '.'
+        ? ''
+        : shouldUnescape
+          ? unescape(seq_id)
+          : seq_id,
+    source:
+      source.length === 0 || source === '.'
+        ? null
+        : shouldUnescape
+          ? unescape(source)
+          : source,
+    type:
+      type.length === 0 || type === '.'
+        ? null
+        : shouldUnescape
+          ? unescape(type)
+          : type,
+    start: startStr.length === 0 || startStr === '.' ? 0 : +startStr - 1,
+    end: endStr.length === 0 || endStr === '.' ? 0 : +endStr,
+    score: scoreStr.length === 0 || scoreStr === '.' ? undefined : +scoreStr,
+    strand:
+      strand === '+'
+        ? 1
+        : strand === '-'
+          ? -1
+          : strand === '.'
+            ? 0
+            : undefined,
+    phase: phase.length === 0 || phase === '.' ? undefined : +phase,
+    subfeatures: [],
   }
 
-  let len = attrString.length
-  if (attrString[len - 1] === '\n') {
-    len = attrString[len - 2] === '\r' ? len - 2 : len - 1
-    attrString = attrString.slice(0, len)
-  }
-
-  let start = 0
-  while (start < len) {
-    let semiIdx = attrString.indexOf(';', start)
-    if (semiIdx === -1) {
-      semiIdx = len
-    }
-
-    if (semiIdx > start) {
-      const eqIdx = attrString.indexOf('=', start)
-      if (eqIdx !== -1 && eqIdx < semiIdx && eqIdx + 1 < semiIdx) {
-        const tag = attrString.slice(start, eqIdx)
-        if (tag === '_lineHash') {
-          start = semiIdx + 1
-          continue
-        }
-
-        let key = tag.toLowerCase()
-        if (JBROWSE_DEFAULT_FIELDS.has(key)) {
-          key += '2'
-        }
-
-        const values: string[] = []
-        let valStart = eqIdx + 1
-        while (valStart < semiIdx) {
-          let commaIdx = attrString.indexOf(',', valStart)
-          if (commaIdx === -1 || commaIdx > semiIdx) {
-            commaIdx = semiIdx
-          }
-          if (commaIdx > valStart) {
-            values.push(attrString.slice(valStart, commaIdx))
-          }
-          valStart = commaIdx + 1
-        }
-
-        result[key] = values.length === 1 ? values[0] : values
-      }
-    }
-    start = semiIdx + 1
-  }
+  parseAttributesJBrowseImpl(attrString, result, shouldUnescape)
+  return result
 }
 
 export function parseFeatureJBrowse(line: string): JBrowseFeature {
-  const f = line.split('\t')
-  const seq_id = f[0]
-  const source = f[1]
-  const type = f[2]
-  const startStr = f[3]
-  const endStr = f[4]
-  const scoreStr = f[5]
-  const strand = f[6]
-  const phase = f[7]
-  const attrString = f[8]
-
-  const result: JBrowseFeature = {
-    refName: seq_id.length === 0 || seq_id === '.' ? '' : unescape(seq_id),
-    source: source.length === 0 || source === '.' ? null : unescape(source),
-    type: type.length === 0 || type === '.' ? null : unescape(type),
-    start: startStr.length === 0 || startStr === '.' ? 0 : +startStr - 1,
-    end: endStr.length === 0 || endStr === '.' ? 0 : +endStr,
-    score: scoreStr.length === 0 || scoreStr === '.' ? undefined : +scoreStr,
-    strand: parseStrand(strand),
-    phase: phase.length === 0 || phase === '.' ? undefined : +phase,
-    subfeatures: [],
-  }
-
-  parseAttributesJBrowse(attrString, result)
-  return result
+  return parseFeatureJBrowseImpl(line, true)
 }
 
 export function parseFeatureJBrowseNoUnescape(line: string): JBrowseFeature {
-  const f = line.split('\t')
-  const seq_id = f[0]
-  const source = f[1]
-  const type = f[2]
-  const startStr = f[3]
-  const endStr = f[4]
-  const scoreStr = f[5]
-  const strand = f[6]
-  const phase = f[7]
-  const attrString = f[8]
-
-  const result: JBrowseFeature = {
-    refName: seq_id.length === 0 || seq_id === '.' ? '' : seq_id,
-    source: source.length === 0 || source === '.' ? null : source,
-    type: type.length === 0 || type === '.' ? null : type,
-    start: startStr.length === 0 || startStr === '.' ? 0 : +startStr - 1,
-    end: endStr.length === 0 || endStr === '.' ? 0 : +endStr,
-    score: scoreStr.length === 0 || scoreStr === '.' ? undefined : +scoreStr,
-    strand: parseStrand(strand),
-    phase: phase.length === 0 || phase === '.' ? undefined : +phase,
-    subfeatures: [],
-  }
-
-  parseAttributesJBrowseNoUnescape(attrString, result)
-  return result
+  return parseFeatureJBrowseImpl(line, false)
 }

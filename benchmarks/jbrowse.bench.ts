@@ -1,10 +1,7 @@
 import fs from 'fs'
 import { bench, describe } from 'vitest'
 
-import {
-  parseStringSyncJBrowse,
-  parseRecordsJBrowse,
-} from '../src/api.ts'
+import { parseStringSyncJBrowse, parseRecordsJBrowse } from '../src/api.ts'
 import type { LineRecord } from '../src/api.ts'
 import {
   parseFeatureJBrowse,
@@ -29,26 +26,26 @@ const JBROWSE_DEFAULT_FIELDS = new Set([
 
 // Common GFF3 attribute names pre-lowercased (these are defined in the GFF3 spec)
 const COMMON_ATTRS: Record<string, string> = {
-  'ID': 'id',
-  'Name': 'name',
-  'Parent': 'parent',
-  'Note': 'note',
-  'Dbxref': 'dbxref',
-  'Ontology_term': 'ontology_term',
-  'Is_circular': 'is_circular',
-  'Alias': 'alias',
-  'Target': 'target',
-  'Gap': 'gap',
-  'Derives_from': 'derives_from',
+  ID: 'id',
+  Name: 'name',
+  Parent: 'parent',
+  Note: 'note',
+  Dbxref: 'dbxref',
+  Ontology_term: 'ontology_term',
+  Is_circular: 'is_circular',
+  Alias: 'alias',
+  Target: 'target',
+  Gap: 'gap',
+  Derives_from: 'derives_from',
   // Add lowercase versions too for case-insensitive matching
-  'id': 'id',
-  'name': 'name',
-  'parent': 'parent',
-  'note': 'note',
-  'dbxref': 'dbxref',
-  'alias': 'alias',
-  'target': 'target',
-  'gap': 'gap',
+  id: 'id',
+  name: 'name',
+  parent: 'parent',
+  note: 'note',
+  dbxref: 'dbxref',
+  alias: 'alias',
+  target: 'target',
+  gap: 'gap',
 }
 
 function parseAttributesJBrowseOptimized(
@@ -181,7 +178,8 @@ function parseFeatureJBrowseOptimized(line: string): JBrowseFeature {
   const phase = f[7]!
   const attrString = f[8]!
 
-  const strandVal = strand === '+' ? 1 : strand === '-' ? -1 : strand === '.' ? 0 : undefined
+  const strandVal =
+    strand === '+' ? 1 : strand === '-' ? -1 : strand === '.' ? 0 : undefined
 
   const result: JBrowseFeature = {
     refName: seq_id.length === 0 || seq_id === '.' ? '' : unescape(seq_id),
@@ -211,7 +209,8 @@ function parseFeatureJBrowseNoUnescapeOptimized(line: string): JBrowseFeature {
   const phase = f[7]!
   const attrString = f[8]!
 
-  const strandVal = strand === '+' ? 1 : strand === '-' ? -1 : strand === '.' ? 0 : undefined
+  const strandVal =
+    strand === '+' ? 1 : strand === '-' ? -1 : strand === '.' ? 0 : undefined
 
   const result: JBrowseFeature = {
     refName: seq_id.length === 0 || seq_id === '.' ? '' : seq_id,
@@ -336,7 +335,8 @@ describe('parseAttributesJBrowse - common attrs', () => {
 
 // Benchmark attributes with uncommon attrs
 describe('parseAttributesJBrowse - uncommon attrs', () => {
-  const attrs = 'gene_id=ENSG00000223972;transcript_id=ENST00000456328;biotype=lncRNA'
+  const attrs =
+    'gene_id=ENSG00000223972;transcript_id=ENST00000456328;biotype=lncRNA'
 
   bench('current', () => {
     const result: Record<string, unknown> = {}
@@ -351,7 +351,8 @@ describe('parseAttributesJBrowse - uncommon attrs', () => {
 
 // Benchmark single feature parsing
 describe('parseFeatureJBrowse - single line', () => {
-  const line = 'chr1\tAraport11\tgene\t3631\t5899\t.\t+\t.\tID=AT1G01010;Name=NAC001;Note=NAC domain containing protein 1'
+  const line =
+    'chr1\tAraport11\tgene\t3631\t5899\t.\t+\t.\tID=AT1G01010;Name=NAC001;Note=NAC domain containing protein 1'
 
   bench('current', () => {
     parseFeatureJBrowse(line)
@@ -366,13 +367,21 @@ describe('parseFeatureJBrowse - single line', () => {
 describe('parseStringSyncJBrowse - large file (tair10_chr1)', () => {
   const data = fs.readFileSync('test/data/tair10_chr1.gff', 'utf8')
 
-  bench('current', () => {
-    parseStringSyncJBrowse(data)
-  }, { iterations: 50, warmupIterations: 5 })
+  bench(
+    'current',
+    () => {
+      parseStringSyncJBrowse(data)
+    },
+    { iterations: 50, warmupIterations: 5 },
+  )
 
-  bench('optimized (common attr lookup)', () => {
-    parseStringSyncJBrowseOptimized(data)
-  }, { iterations: 50, warmupIterations: 5 })
+  bench(
+    'optimized (common attr lookup)',
+    () => {
+      parseStringSyncJBrowseOptimized(data)
+    },
+    { iterations: 50, warmupIterations: 5 },
+  )
 })
 
 // Benchmark full file parsing - medium file

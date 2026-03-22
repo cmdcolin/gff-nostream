@@ -3,7 +3,8 @@
   "compilerOptions": {
     "lib": ["dom", "esnext"],
     "declaration": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "sourceMap": true,
     "strict": true,
     "noImplicitReturns": true,

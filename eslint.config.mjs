@@ -44,21 +44,16 @@ export default defineConfig(
 
       'no-underscore-dangle': 'off',
       curly: 'error',
+      eqeqeq: 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
       semi: ['error', 'never'],
 
-      '@typescript-eslint/restrict-template-expressions': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/ban-ts-comment': ['error', { 'ts-expect-error': 'allow-with-description', 'ts-ignore': true }],
-      '@typescript-eslint/unbound-method': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/prefer-nullish-coalescing': 'off',
-      '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/no-dynamic-delete': 'off',
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        { 'ts-expect-error': 'allow-with-description', 'ts-ignore': true },
+      ],
       'import/no-unresolved': 'off',
       'import/extensions': ['error', 'ignorePackages'],
       'import/order': [

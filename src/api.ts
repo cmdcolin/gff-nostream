@@ -85,9 +85,7 @@ export function parseRecords(records: LineRecord[]): GFF3Feature[] {
     featureLine.derived_features = []
 
     if (record.lineHash !== undefined) {
-      if (!featureLine.attributes) {
-        featureLine.attributes = {}
-      }
+      featureLine.attributes ??= {}
       featureLine.attributes._lineHash = [String(record.lineHash)]
     }
 
