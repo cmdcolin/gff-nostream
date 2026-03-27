@@ -1,5 +1,5 @@
-import fs from 'fs'
-import { gunzipSync } from 'zlib'
+import fs from 'node:fs'
+import { gunzipSync } from 'node:zlib'
 
 import { expect, test } from 'vitest'
 

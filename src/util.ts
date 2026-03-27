@@ -532,13 +532,7 @@ function parseFeatureJBrowseImpl(
     end: endStr.length === 0 || endStr === '.' ? 0 : +endStr,
     score: scoreStr.length === 0 || scoreStr === '.' ? undefined : +scoreStr,
     strand:
-      strand === '+'
-        ? 1
-        : strand === '-'
-          ? -1
-          : strand === '.'
-            ? 0
-            : undefined,
+      strand === '+' ? 1 : strand === '-' ? -1 : strand === '.' ? 0 : undefined,
     phase: phase.length === 0 || phase === '.' ? undefined : +phase,
     subfeatures: [],
   }

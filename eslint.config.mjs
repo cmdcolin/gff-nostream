@@ -48,7 +48,10 @@ export default defineConfig(
       '@typescript-eslint/consistent-type-imports': 'error',
       semi: ['error', 'never'],
 
-      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
+        { allowNumber: true },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/ban-ts-comment': [
         'error',
