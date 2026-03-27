@@ -1,10 +1,15 @@
 {
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "compilerOptions": {
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "declaration": true,
-    "moduleResolution": "bundler",
-    "module": "esnext",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "rootDir": "./src",
     "sourceMap": true,
     "strict": true,
