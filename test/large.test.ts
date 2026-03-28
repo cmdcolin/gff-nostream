@@ -1,5 +1,5 @@
-import fs from 'fs'
-import { gunzipSync } from 'zlib'
+import fs from 'node:fs'
+import { gunzipSync } from 'node:zlib'
 
 import { expect, test } from 'vitest'
 
@@ -8,7 +8,7 @@ import { parseStringSync } from '../src/index.ts'
 test('large weird file', () => {
   const data = JSON.parse(
     gunzipSync(fs.readFileSync('test/data/data.json.gz')).toString(),
-  )
+  ) as string[]
   const ret = data.join('\n')
   const d2 = parseStringSync(ret)
   expect(d2).toBeTruthy()

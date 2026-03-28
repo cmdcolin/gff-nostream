@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
@@ -173,7 +173,7 @@ describe('JBrowse format parser', () => {
 
     const result = parseStringSyncJBrowse(gff3)
     expect(result.length).toBe(1)
-    const feature = result[0]!
+    const feature = result[0]
     expect(feature.refName).toBe('ctg123')
     expect(feature.start).toBe(999) // 0-based (1000 - 1)
     expect(feature.end).toBe(9000)
@@ -191,15 +191,15 @@ describe('JBrowse format parser', () => {
 chr1\t.\tgene\t300\t400\t.\t.\t.\tID=g2`
 
     const result = parseStringSyncJBrowse(gff3)
-    expect(result[0]!.strand).toBe(-1)
-    expect(result[1]!.strand).toBe(0)
+    expect(result[0].strand).toBe(-1)
+    expect(result[1].strand).toBe(0)
   })
 
   it('parses phase as number', () => {
     const gff3 = `chr1\t.\tCDS\t100\t200\t.\t+\t2\tID=cds1`
 
     const result = parseStringSyncJBrowse(gff3)
-    expect(result[0]!.phase).toBe(2)
+    expect(result[0].phase).toBe(2)
   })
 
   it('builds subfeatures from parent/child relationships', () => {
@@ -209,30 +209,30 @@ ctg123\t.\texon\t1050\t1500\t.\t+\t.\tID=exon1;Parent=mRNA00001`
 
     const result = parseStringSyncJBrowse(gff3)
     expect(result.length).toBe(1)
-    const gene = result[0]!
+    const gene = result[0]
     expect(gene.id).toBe('gene00001')
     expect(gene.subfeatures.length).toBe(1)
-    const mrna = gene.subfeatures[0]!
+    const mrna = gene.subfeatures[0]
     expect(mrna.id).toBe('mRNA00001')
     expect(mrna.subfeatures.length).toBe(1)
-    expect(mrna.subfeatures[0]!.id).toBe('exon1')
+    expect(mrna.subfeatures[0].id).toBe('exon1')
   })
 
   it('keeps multi-value attributes as arrays', () => {
     const gff3 = `chr1\t.\tgene\t100\t200\t.\t+\t.\tID=g1;Dbxref=GO:123,GO:456`
 
     const result = parseStringSyncJBrowse(gff3)
-    expect(result[0]!.dbxref).toEqual(['GO:123', 'GO:456'])
+    expect(result[0].dbxref).toEqual(['GO:123', 'GO:456'])
   })
 
   it('adds suffix to attribute names that conflict with default fields', () => {
     const gff3 = `chr1\t.\tgene\t100\t200\t.\t+\t.\tID=g1;Start=custom_start;Type=custom_type`
 
     const result = parseStringSyncJBrowse(gff3)
-    expect(result[0]!.start).toBe(99) // actual start field
-    expect(result[0]!.start2).toBe('custom_start') // attribute with suffix
-    expect(result[0]!.type).toBe('gene') // actual type field
-    expect(result[0]!.type2).toBe('custom_type') // attribute with suffix
+    expect(result[0].start).toBe(99) // actual start field
+    expect(result[0].start2).toBe('custom_start') // attribute with suffix
+    expect(result[0].type).toBe('gene') // actual type field
+    expect(result[0].type2).toBe('custom_type') // attribute with suffix
   })
 
   it('parseRecordsJBrowse includes _lineHash', () => {
@@ -254,17 +254,17 @@ ctg123\t.\texon\t1050\t1500\t.\t+\t.\tID=exon1;Parent=mRNA00001`
     ]
     const result = parseRecordsJBrowse(records)
     expect(result.length).toBe(1)
-    expect(result[0]!._lineHash).toBe('offset123')
-    expect(result[0]!.subfeatures[0]!._lineHash).toBe('456')
+    expect(result[0]._lineHash).toBe('offset123')
+    expect(result[0].subfeatures[0]._lineHash).toBe('456')
   })
 
   it('handles escaped characters', () => {
     const gff3 = `SL2.40%25ch01\tIT%25AG\tgene\t100\t200\t.\t+\t.\tID=gene%3B1;Name=Test%20Gene`
 
     const result = parseStringSyncJBrowse(gff3)
-    expect(result[0]!.refName).toBe('SL2.40%ch01')
-    expect(result[0]!.source).toBe('IT%AG')
-    expect(result[0]!.id).toBe('gene;1')
-    expect(result[0]!.name).toBe('Test Gene')
+    expect(result[0].refName).toBe('SL2.40%ch01')
+    expect(result[0].source).toBe('IT%AG')
+    expect(result[0].id).toBe('gene;1')
+    expect(result[0].name).toBe('Test Gene')
   })
 })
