@@ -3,7 +3,10 @@
   "version": "3.0.2",
   "description": "utilities to read GFF3 data",
   "license": "MIT",
-  "repository": "cmdcolin/gff-nostream",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cmdcolin/gff-nostream.git"
+  },
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -34,7 +37,7 @@
     "format": "prettier --write .",
     "prebuild": "yarn clean",
     "build:esm": "tsc --target esnext --outDir esm",
-    "build:es5": "tsc --target es2020 --module commonjs --outDir dist",
+    "build:es5": "tsc --target es2020 --module commonjs --moduleResolution bundler --outDir dist",
     "postbuild:es5": "echo '{\"type\": \"commonjs\"}' > dist/package.json",
     "build": "yarn build:es5 && yarn build:esm",
     "prepublishOnly": "yarn test --run && yarn build",
@@ -48,17 +51,20 @@
     "genomics"
   ],
   "devDependencies": {
-    "@types/node": "^24.10.1",
-    "@typescript-eslint/eslint-plugin": "^8.48.0",
-    "@typescript-eslint/parser": "^8.48.0",
-    "@vitest/coverage-v8": "^4.0.14",
+    "@types/node": "^25.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
+    "@vitest/coverage-v8": "^4.1.1",
     "documentation": "^14.0.1",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
-    "prettier": "^3.6.2",
-    "rimraf": "^6.1.2",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0",
-    "vitest": "^4.0.14"
+    "prettier": "^3.8.1",
+    "rimraf": "^6.1.3",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.57.2",
+    "vitest": "^4.1.1"
+  },
+  "dependencies": {
+    "@jbrowse/quick-lru": "^7.3.5"
   }
 }
