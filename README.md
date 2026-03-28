@@ -1,9 +1,10 @@
 # gff-nostream
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/cmdcolin/gff-nostream/push.yml?branch=master&logo=github&style=for-the-badge)](https://github.com/cmdcolin/gff-nostream/actions?query=branch%3Amaster+workflow%3APush+)
+[![NPM version](https://img.shields.io/npm/v/gff-nostream.svg?style=flat-square)](https://npmjs.org/package/gff-nostream)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/cmdcolin/gff-nostream/push.yml?branch=main)](https://github.com/cmdcolin/gff-nostream/actions?query=branch%3Amain+workflow%3APush+)
 
 Parse GFF3 data. This is a simplified version of
-[@gmod/gff](https://github.com/GMOD/gff-js) with just basic parsing and no
+[@gmod/gff](https://github.com/cmdcolin/gff-js) with just basic parsing and no
 node.js stream module usage
 
 ## Install
